@@ -3,6 +3,7 @@
  * Used by the flashcards view and useFlashcardsList hook.
  */
 import type {
+  FlashcardCreateDto,
   FlashcardDto,
   FlashcardsListQueryParams,
   FlashcardsListResponseDto,
@@ -28,12 +29,16 @@ export type DeleteResult =
   | { ok: true; data: { message: string } }
   | { ok: false; error: ApiError };
 
+export type CreateResult =
+  | { ok: true; data: { flashcards: FlashcardDto[] } }
+  | { ok: false; error: ApiError };
+
 function buildListUrl(params: FlashcardsListQueryParams): string {
   const search = new URLSearchParams();
   search.set("page", String(params.page));
   search.set("limit", String(params.limit));
   search.set("sort", params.sort);
-  if (params.source != null && params.source !== "") {
+  if (params.source != null) {
     search.set("source", params.source);
   }
   return `/api/flashcards?${search.toString()}`;
@@ -96,6 +101,50 @@ export async function updateFlashcard(
 
   if (response.ok) {
     return { ok: true, data: body as FlashcardDto };
+  }
+
+  const err = body as { error?: string; message?: string; details?: Record<string, string[] | undefined> };
+  return {
+    ok: false,
+    error: {
+      status: response.status,
+      error: err.error,
+      message: err.message,
+      details: err.details,
+    },
+  };
+}
+
+/**
+ * POST /api/flashcards – create one or more flashcards.
+ * Body: { flashcards: FlashcardCreateDto[] }.
+ */
+export async function createFlashcards(
+  flashcards: FlashcardCreateDto[]
+): Promise<CreateResult> {
+  if (flashcards.length === 0) {
+    return {
+      ok: false,
+      error: {
+        status: 400,
+        message: "At least one flashcard is required",
+      },
+    };
+  }
+
+  const response = await fetch("/api/flashcards", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ flashcards }),
+  });
+
+  const body = await parseJsonResponse<
+    { flashcards?: FlashcardDto[] } | { error?: string; message?: string; details?: Record<string, string[] | undefined> }
+  >(response);
+
+  if (response.ok && body && "flashcards" in body) {
+    return { ok: true, data: { flashcards: body.flashcards ?? [] } };
   }
 
   const err = body as { error?: string; message?: string; details?: Record<string, string[] | undefined> };

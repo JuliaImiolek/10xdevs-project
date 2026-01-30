@@ -5,6 +5,7 @@ import { FlashcardList } from "./FlashcardList";
 import { SkeletonLoader } from "./SkeletonLoader";
 import { BulkSaveButton } from "./BulkSaveButton";
 import { ErrorNotification } from "./ErrorNotification";
+import { ManualFlashcardForm } from "./ManualFlashcardForm";
 import { useFlashcardGeneration } from "@/components/hooks/useFlashcardGeneration";
 import {
   TEXT_INPUT_MIN_LENGTH,
@@ -58,6 +59,8 @@ function FlashcardGenerationView() {
           Generuj fiszki
         </Button>
       </div>
+
+      <ManualFlashcardForm disabled={loading} />
 
       {displayError && <ErrorNotification errorMessage={displayError} />}
 

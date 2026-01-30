@@ -1,6 +1,7 @@
 import * as React from "react";
 import type { FlashcardViewModel, FlashcardCreateDto } from "@/types";
 import type { FlashcardItemAction } from "@/components/generate/FlashcardListItem";
+import { createFlashcards } from "@/lib/flashcards-api";
 import {
   TEXT_INPUT_MIN_LENGTH,
   TEXT_INPUT_MAX_LENGTH,
@@ -133,30 +134,24 @@ function useFlashcardGeneration(): UseFlashcardGenerationResult {
     []
   );
 
-  const handleSave = React.useCallback((toSave: FlashcardCreateDto[]) => {
-    if (toSave.length === 0) return;
-    setApiError(null);
-    fetch("/api/flashcards", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ flashcards: toSave }),
-    })
-      .then(async (res) => {
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          const msg =
-            data?.message ?? data?.error ?? `Błąd zapisu: ${res.status}`;
-          throw new Error(msg);
-        }
+  const handleSave = React.useCallback(
+    async (toSave: FlashcardCreateDto[]) => {
+      if (toSave.length === 0) return;
+      setApiError(null);
+      const result = await createFlashcards(toSave);
+      if (result.ok) {
         setFlashcards([]);
         setGenerationId(null);
-      })
-      .catch((err) => {
-        setApiError(
-          err instanceof Error ? err.message : "Błąd zapisu fiszek."
-        );
-      });
-  }, []);
+        return;
+      }
+      const msg =
+        result.error.message ??
+        result.error.error ??
+        "Błąd zapisu fiszek.";
+      setApiError(msg);
+    },
+    []
+  );
 
   const displayError = apiError ?? textError ?? null;
 
