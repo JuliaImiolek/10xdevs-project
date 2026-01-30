@@ -157,3 +157,29 @@ export interface GenerationErrorLogsListResponseDto {
   data: GenerationErrorLogDto[];
   pagination: PaginationDto;
 }
+
+// ------------------------------------------------------------------------------------------------
+// View models for generate view (client-side state)
+// ------------------------------------------------------------------------------------------------
+
+/** View model for text input area: value and optional validation error. */
+export interface TextInputViewModel {
+  value: string;
+  error?: string;
+}
+
+/**
+ * Flashcard view model: proposal from API with client-side id and status.
+ * Used in generate view for list items (accept / edit / reject).
+ */
+export interface FlashcardViewModel {
+  /** Client-side id for list key (proposals from API have no id). */
+  id: string;
+  front: string;
+  back: string;
+  source: Source;
+  /** Set from generation response when saving. */
+  generation_id: number | null;
+  /** UI status for bulk save (only accepted are saved by default). */
+  status: "pending" | "accepted" | "rejected" | "edited";
+}
