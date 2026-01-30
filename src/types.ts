@@ -101,6 +101,35 @@ export interface GenerationCreateResponseDto {
 }
 
 // ------------------------------------------------------------------------------------------------
+// 8a. Generation List Item DTO
+//     Single generation record in list response (GET /generations).
+//     Matches generations table row; user_id included for consistency with GET /generations/{id}.
+// ------------------------------------------------------------------------------------------------
+export type GenerationListItemDto = Pick<
+  Generation,
+  | "id"
+  | "user_id"
+  | "model"
+  | "generated_count"
+  | "accepted_unedited_count"
+  | "accepted_edited_count"
+  | "source_text_hash"
+  | "source_text_length"
+  | "generation_duration"
+  | "created_at"
+  | "updated_at"
+>;
+
+// ------------------------------------------------------------------------------------------------
+// 8b. Generations List Response DTO
+//     Response body for GET /generations: data array + pagination metadata.
+// ------------------------------------------------------------------------------------------------
+export interface GenerationsListResponseDto {
+  data: GenerationListItemDto[];
+  pagination: PaginationDto;
+}
+
+// ------------------------------------------------------------------------------------------------
 // 9. Generation Detail DTO
 //    Provides detailed information for a generation request (GET /generations/{id}),
 //    including metadata from the generations table and optionally, the associated flashcards.

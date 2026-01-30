@@ -1,13 +1,16 @@
 /**
- * POST /api/generations
- * Initiates AI flashcard generation from source_text.
- * Returns 201 with generation_id, flashcards_proposals, generated_count;
- * 400 on validation error, 500 on server/DB error, 599 on AI error.
+ * POST /api/generations — initiates AI flashcard generation.
+ * GET /api/generations — lists user's generations with pagination, sort, and filters.
  */
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import { DEFAULT_USER_ID } from "../../db/supabase.client";
-import { createGeneration } from "../../lib/services/generation.service";
+import { json } from "../../lib/api-response";
+import {
+  createGeneration,
+  listGenerations,
+  type ListGenerationsOptions,
+} from "../../lib/services/generation.service";
 
 export const prerender = false;
 
@@ -32,12 +35,211 @@ export const generationRequestSchema = z.object({
 
 export type GenerationRequestInput = z.infer<typeof generationRequestSchema>;
 
-const json = (body: unknown, status: number, init?: ResponseInit) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json", ...init?.headers },
-    ...init,
+// ------------------------------------------------------------------------------------------------
+// GET /generations — query parameters (pagination, sort, filters)
+// ------------------------------------------------------------------------------------------------
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 20;
+const MAX_LIMIT = 100;
+const SOURCE_TEXT_LENGTH_MIN = 1000;
+const SOURCE_TEXT_LENGTH_MAX = 10000;
+
+const generationsListSortEnum = z.enum([
+  "created_at",
+  "created_at_desc",
+  "updated_at",
+  "updated_at_desc",
+  "model",
+  "model_desc",
+  "generation_duration",
+  "generation_duration_desc",
+]);
+
+export const generationsListQuerySchema = z
+  .object({
+    page: z
+      .union([z.string(), z.number(), z.undefined()])
+      .transform((v) =>
+        v === undefined || v === "" ? DEFAULT_PAGE : Number(v)
+      )
+      .pipe(z.number().int().min(1, "Page must be at least 1")),
+    limit: z
+      .union([z.string(), z.number(), z.undefined()])
+      .transform((v) =>
+        v === undefined || v === "" ? DEFAULT_LIMIT : Number(v)
+      )
+      .pipe(
+        z
+          .number()
+          .int()
+          .min(1, "Limit must be at least 1")
+          .max(MAX_LIMIT, `Limit must be at most ${MAX_LIMIT}`)
+      ),
+    sort: z
+      .string()
+      .optional()
+      .default("created_at_desc")
+      .refine(
+        (v) => generationsListSortEnum.safeParse(v).success,
+        "Invalid sort value"
+      )
+      .transform((v) => v as z.infer<typeof generationsListSortEnum>),
+    // Optional filters (empty string treated as absent)
+    model: z
+      .string()
+      .optional()
+      .transform((s) => (s === "" ? undefined : s)),
+    created_after: z
+      .string()
+      .optional()
+      .transform((s) => (s === "" ? undefined : s))
+      .pipe(
+        z.optional(
+          z.string().datetime({
+            offset: true,
+            message: "created_after must be ISO 8601 datetime",
+          })
+        )
+      ),
+    created_before: z
+      .string()
+      .optional()
+      .transform((s) => (s === "" ? undefined : s))
+      .pipe(
+        z.optional(
+          z.string().datetime({
+            offset: true,
+            message: "created_before must be ISO 8601 datetime",
+          })
+        )
+      ),
+    source_text_length_min: z
+      .union([z.string(), z.number(), z.undefined()])
+      .transform((v) => (v === undefined || v === "" ? undefined : Number(v)))
+      .pipe(
+        z.optional(
+          z
+            .number()
+            .int()
+            .min(
+              SOURCE_TEXT_LENGTH_MIN,
+              `source_text_length_min must be between ${SOURCE_TEXT_LENGTH_MIN} and ${SOURCE_TEXT_LENGTH_MAX}`
+            )
+            .max(
+              SOURCE_TEXT_LENGTH_MAX,
+              `source_text_length_min must be between ${SOURCE_TEXT_LENGTH_MIN} and ${SOURCE_TEXT_LENGTH_MAX}`
+            )
+        )
+      ),
+    source_text_length_max: z
+      .union([z.string(), z.number(), z.undefined()])
+      .transform((v) => (v === undefined || v === "" ? undefined : Number(v)))
+      .pipe(
+        z.optional(
+          z
+            .number()
+            .int()
+            .min(
+              SOURCE_TEXT_LENGTH_MIN,
+              `source_text_length_max must be between ${SOURCE_TEXT_LENGTH_MIN} and ${SOURCE_TEXT_LENGTH_MAX}`
+            )
+            .max(
+              SOURCE_TEXT_LENGTH_MAX,
+              `source_text_length_max must be between ${SOURCE_TEXT_LENGTH_MIN} and ${SOURCE_TEXT_LENGTH_MAX}`
+            )
+        )
+      ),
+  })
+  .superRefine((data, ctx) => {
+    const min = data.source_text_length_min;
+    const max = data.source_text_length_max;
+    if (min !== undefined && max !== undefined && min > max) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "source_text_length_min must be less than or equal to source_text_length_max",
+        path: ["source_text_length_max"],
+      });
+    }
   });
+
+export type GenerationsListQuery = z.infer<typeof generationsListQuerySchema>;
+
+/**
+ * Maps validated query (flat) to ListGenerationsOptions (with nested filter).
+ */
+function queryToOptions(parsed: GenerationsListQuery): ListGenerationsOptions {
+  const filter =
+    parsed.model != null ||
+    parsed.created_after != null ||
+    parsed.created_before != null ||
+    parsed.source_text_length_min != null ||
+    parsed.source_text_length_max != null
+      ? {
+          ...(parsed.model != null && { model: parsed.model }),
+          ...(parsed.created_after != null && { created_after: parsed.created_after }),
+          ...(parsed.created_before != null && { created_before: parsed.created_before }),
+          ...(parsed.source_text_length_min != null && {
+            source_text_length_min: parsed.source_text_length_min,
+          }),
+          ...(parsed.source_text_length_max != null && {
+            source_text_length_max: parsed.source_text_length_max,
+          }),
+        }
+      : undefined;
+
+  return {
+    page: parsed.page,
+    limit: parsed.limit,
+    sort: parsed.sort,
+    filter,
+  };
+}
+
+/**
+ * GET /api/generations
+ * Lists generations for the authenticated user. Query: page, limit, sort, optional filters.
+ * Returns 200 with { data, pagination }; 400 on invalid params; 401 if unauthenticated; 500 on server error.
+ */
+export const GET: APIRoute = async (context) => {
+  const { request, locals } = context;
+  const supabase = locals.supabase;
+
+  const url = new URL(request.url);
+  const raw = Object.fromEntries(url.searchParams);
+
+  const parsed = generationsListQuerySchema.safeParse(raw);
+  if (!parsed.success) {
+    const details = parsed.error.flatten().fieldErrors;
+    return json(
+      {
+        error: "Bad Request",
+        message: "Invalid query parameters",
+        details,
+      },
+      400
+    );
+  }
+
+  const userId = DEFAULT_USER_ID;
+  if (!userId) {
+    return json(
+      { error: "Unauthorized", message: "Authentication required" },
+      401
+    );
+  }
+
+  const options = queryToOptions(parsed.data);
+  const result = await listGenerations(supabase, userId, options);
+
+  if (result.success) {
+    return json(result.data, 200);
+  }
+
+  return json(
+    { error: "Internal Server Error", message: "Failed to list generations" },
+    500
+  );
+};
 
 export const POST: APIRoute = async (context) => {
   const { request, locals } = context;
