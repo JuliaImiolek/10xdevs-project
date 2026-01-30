@@ -1,14 +1,20 @@
 /**
+ * GET /api/flashcards/[id] — fetches a single flashcard by id.
  * PUT /api/flashcards/[id] — updates an existing flashcard by id.
  * DELETE /api/flashcards/[id] — deletes a flashcard by id.
- * Both require authentication; user can only update/delete their own flashcards.
- * Returns 200 on success; 400 invalid id/body; 401 unauthenticated; 404 not found; 500 server error.
+ * All require authentication; user can only read/update/delete their own flashcards.
+ * GET: 200 + FlashcardDto; 400 invalid id; 401 unauthenticated; 404 not found; 500 server error.
+ * PUT/DELETE: 200 on success; 400 invalid id/body; 401 unauthenticated; 404 not found; 500 server error.
  */
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import { DEFAULT_USER_ID } from "../../../db/supabase.client";
 import { json } from "../../../lib/api-response";
-import { updateFlashcard, deleteFlashcard } from "../../../lib/services/flashcard.service";
+import {
+  getFlashcardById,
+  updateFlashcard,
+  deleteFlashcard,
+} from "../../../lib/services/flashcard.service";
 
 export const prerender = false;
 
@@ -44,6 +50,55 @@ const flashcardPutBodySchema = z
   );
 
 export type FlashcardPutRequestBody = z.infer<typeof flashcardPutBodySchema>;
+
+/**
+ * GET /api/flashcards/[id]
+ * Returns a single flashcard by id. Path param `id` must be a positive integer.
+ * Returns 200 with FlashcardDto; 400 invalid id; 401 unauthenticated; 404 not found; 500 on server error.
+ */
+export const GET: APIRoute = async (context) => {
+  const { params, locals } = context;
+
+  const parsedParams = flashcardIdParamSchema.safeParse(params);
+  if (!parsedParams.success) {
+    const details = parsedParams.error.flatten().fieldErrors;
+    return json(
+      {
+        error: "Bad Request",
+        message: "Invalid flashcard id",
+        details,
+      },
+      400
+    );
+  }
+
+  const userId = DEFAULT_USER_ID;
+  if (!userId) {
+    return json(
+      { error: "Unauthorized", message: "Authentication required" },
+      401
+    );
+  }
+
+  const supabase = locals.supabase;
+  const result = await getFlashcardById(supabase, userId, parsedParams.data.id);
+
+  if (!result.success) {
+    return json(
+      { error: "Internal Server Error", message: result.errorMessage },
+      500
+    );
+  }
+
+  if (result.data === null) {
+    return json(
+      { error: "Not Found", message: "Flashcard not found" },
+      404
+    );
+  }
+
+  return json(result.data, 200);
+};
 
 /**
  * PUT /api/flashcards/[id]
