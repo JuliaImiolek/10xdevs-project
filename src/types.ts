@@ -74,6 +74,36 @@ export type FlashcardUpdateDto = Partial<{
 }>;
 
 // ------------------------------------------------------------------------------------------------
+// 5a. Flashcard PUT Payload (View / API)
+//     Body for PUT /api/flashcards/{id}. At least one field required.
+//     source only "ai-edited" | "manual" (API validation: front 1–200, back 1–500).
+// ------------------------------------------------------------------------------------------------
+export type FlashcardPutPayload = {
+  front?: string;
+  back?: string;
+  source?: "ai-edited" | "manual";
+};
+
+// ------------------------------------------------------------------------------------------------
+// 5b. Flashcards List Query Params (View)
+//     Query params for GET /api/flashcards. Matches API flashcardsListQuerySchema.
+// ------------------------------------------------------------------------------------------------
+export type FlashcardsListSort =
+  | "created_at"
+  | "created_at_desc"
+  | "updated_at"
+  | "updated_at_desc"
+  | "source"
+  | "source_desc";
+
+export interface FlashcardsListQueryParams {
+  page: number;
+  limit: number;
+  sort: FlashcardsListSort;
+  source?: "manual" | "ai-full" | "ai-edited";
+}
+
+// ------------------------------------------------------------------------------------------------
 // 6. Generate Flashcards Command
 //    Used in the POST /generations endpoint to initiate the AI flashcard generation process.
 //    The "source_text" must be between 1000 and 10000 characters.

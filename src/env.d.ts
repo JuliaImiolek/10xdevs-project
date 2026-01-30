@@ -6,6 +6,8 @@ declare global {
   namespace App {
     interface Locals {
       supabase: SupabaseClient;
+      /** Set from session when auth is implemented; until then DEFAULT_USER_ID in middleware for protected routes. */
+      userId?: string;
     }
   }
 }
