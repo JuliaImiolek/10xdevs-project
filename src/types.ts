@@ -63,6 +63,8 @@ export interface FlashcardsCreateCommand {
 // 5. Flashcard Update DTO (Command Model)
 //    For the PUT /flashcards/{id} endpoint to update existing flashcards.
 //    This model is a partial update of flashcard fields.
+//    Note: In PUT /flashcards/{id}, the API accepts only source "ai-edited" | "manual"
+//    (not "ai-full"); validation is enforced by Zod in the endpoint handler.
 // ------------------------------------------------------------------------------------------------
 export type FlashcardUpdateDto = Partial<{
   front: string;
@@ -146,3 +148,12 @@ export type GenerationErrorLogDto = Pick<
   GenerationErrorLog,
   "id" | "error_code" | "error_message" | "model" | "source_text_hash" | "source_text_length" | "created_at" | "user_id"
 >;
+
+// ------------------------------------------------------------------------------------------------
+// 10a. Generation Error Logs List Response DTO
+//      Response body for GET /generation-error-logs: data array + pagination metadata.
+// ------------------------------------------------------------------------------------------------
+export interface GenerationErrorLogsListResponseDto {
+  data: GenerationErrorLogDto[];
+  pagination: PaginationDto;
+}

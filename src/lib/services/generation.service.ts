@@ -8,6 +8,8 @@ import type { Database } from "../../db/database.types";
 import type {
   FlashcardProposalDto,
   GenerationCreateResponseDto,
+  GenerationErrorLogDto,
+  GenerationErrorLogsListResponseDto,
   GenerationListItemDto,
   GenerationsListResponseDto,
 } from "../../types";
@@ -72,6 +74,30 @@ export interface ListGenerationsOptions {
 
 export type ListGenerationsResult =
   | { success: true; data: GenerationsListResponseDto }
+  | { success: false; errorMessage: string };
+
+/** Options for listing generation error logs: pagination, sort, and optional filters. */
+export interface ListGenerationErrorLogsFilter {
+  model?: string;
+  created_after?: string;
+  created_before?: string;
+}
+
+export interface ListGenerationErrorLogsOptions {
+  page: number;
+  limit: number;
+  sort:
+    | "created_at"
+    | "created_at_desc"
+    | "model"
+    | "model_desc"
+    | "error_code"
+    | "error_code_desc";
+  filter?: ListGenerationErrorLogsFilter;
+}
+
+export type ListGenerationErrorLogsResult =
+  | { success: true; data: GenerationErrorLogsListResponseDto }
   | { success: false; errorMessage: string };
 
 /**
@@ -227,6 +253,28 @@ function mapSortToOrder(
   return map[sort];
 }
 
+type GenerationErrorLogRow = Database["public"]["Tables"]["generation_error_logs"]["Row"];
+
+/**
+ * Maps sort query value to generation_error_logs column and direction.
+ */
+function mapSortToOrderErrorLogs(
+  sort: ListGenerationErrorLogsOptions["sort"]
+): { column: keyof GenerationErrorLogRow; ascending: boolean } {
+  const map: Record<
+    ListGenerationErrorLogsOptions["sort"],
+    { column: keyof GenerationErrorLogRow; ascending: boolean }
+  > = {
+    created_at: { column: "created_at", ascending: true },
+    created_at_desc: { column: "created_at", ascending: false },
+    model: { column: "model", ascending: true },
+    model_desc: { column: "model", ascending: false },
+    error_code: { column: "error_code", ascending: true },
+    error_code_desc: { column: "error_code", ascending: false },
+  };
+  return map[sort];
+}
+
 /**
  * Lists generations for a user with pagination, sort, and optional filters.
  * Used by GET /api/generations. Always filters by user_id from context (authorization).
@@ -310,6 +358,66 @@ export async function getGenerationById(
 
   const dto: GenerationListItemDto = row as GenerationListItemDto;
   return { success: true, data: dto };
+}
+
+/**
+ * Lists generation error logs for a user with pagination, sort, and optional filters.
+ * Used by GET /api/generation-error-logs. Always filters by user_id (authorization).
+ */
+export async function listGenerationErrorLogs(
+  supabase: SupabaseClient,
+  userId: string,
+  options: ListGenerationErrorLogsOptions
+): Promise<ListGenerationErrorLogsResult> {
+  const { page, limit, sort, filter } = options;
+  const from = (page - 1) * limit;
+  const to = page * limit - 1;
+  const { column, ascending } = mapSortToOrderErrorLogs(sort);
+
+  let query = supabase
+    .from("generation_error_logs")
+    .select("*", { count: "exact", head: false })
+    .eq("user_id", userId);
+
+  if (filter?.model) {
+    query = query.eq("model", filter.model);
+  }
+  if (filter?.created_after) {
+    query = query.gte("created_at", filter.created_after);
+  }
+  if (filter?.created_before) {
+    query = query.lte("created_at", filter.created_before);
+  }
+
+  query = query.order(column, { ascending }).range(from, to);
+
+  const { data: rows, error, count } = await query;
+
+  if (error) {
+    console.error("[listGenerationErrorLogs] DB error:", error.message);
+    return { success: false, errorMessage: error.message };
+  }
+
+  const total = count ?? 0;
+  const data: GenerationErrorLogDto[] = (rows ?? []).map((row) => {
+    const r = row as GenerationErrorLogRow;
+    return {
+      id: r.id,
+      user_id: r.user_id,
+      model: r.model,
+      source_text_hash: r.source_text_hash,
+      source_text_length: r.source_text_length,
+      error_code: r.error_code,
+      error_message: r.error_message,
+      created_at: r.created_at,
+    };
+  });
+  const response: GenerationErrorLogsListResponseDto = {
+    data,
+    pagination: { page, limit, total },
+  };
+
+  return { success: true, data: response };
 }
 
 /**

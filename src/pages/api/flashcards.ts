@@ -1,12 +1,17 @@
 /**
- * POST /api/flashcards
- * Creates one or more flashcards (bulk). Supports manual and AI-sourced cards.
- * Returns 201 with created flashcards; 400 on validation error; 401 if unauthenticated; 500 on server error.
+ * POST /api/flashcards — creates one or more flashcards (bulk).
+ * GET /api/flashcards — lists user's flashcards with pagination, sort, and optional filter.
+ * Returns 201/200 on success; 400 on validation error; 401 if unauthenticated; 500 on server error.
  */
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import { DEFAULT_USER_ID } from "../../db/supabase.client";
-import { createFlashcards } from "../../lib/services/flashcard.service";
+import { json } from "../../lib/api-response";
+import {
+  createFlashcards,
+  listFlashcards,
+  type ListFlashcardsOptions,
+} from "../../lib/services/flashcard.service";
 
 export const prerender = false;
 
@@ -54,12 +59,67 @@ export const flashcardsCreateRequestSchema = z.object({
 
 export type FlashcardsCreateRequest = z.infer<typeof flashcardsCreateRequestSchema>;
 
-function json(body: unknown, status: number, init?: ResponseInit): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json", ...init?.headers },
-    ...init,
-  });
+// ------------------------------------------------------------------------------------------------
+// GET /flashcards — query parameters (pagination, sort, optional filter)
+// ------------------------------------------------------------------------------------------------
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 20;
+const MAX_LIMIT = 100;
+
+const flashcardsListSortEnum = z.enum([
+  "created_at",
+  "created_at_desc",
+  "updated_at",
+  "updated_at_desc",
+  "source",
+  "source_desc",
+]);
+
+export const flashcardsListQuerySchema = z.object({
+  page: z
+    .union([z.string(), z.number(), z.undefined()])
+    .transform((v) => (v === undefined || v === "" ? DEFAULT_PAGE : Number(v)))
+    .pipe(z.number().int().min(1, "Page must be at least 1")),
+  limit: z
+    .union([z.string(), z.number(), z.undefined()])
+    .transform((v) => (v === undefined || v === "" ? DEFAULT_LIMIT : Number(v)))
+    .pipe(
+      z
+        .number()
+        .int()
+        .min(1, "Limit must be at least 1")
+        .max(MAX_LIMIT, `Limit must be at most ${MAX_LIMIT}`)
+    ),
+  sort: z
+    .string()
+    .optional()
+    .default("created_at_desc")
+    .refine(
+      (v) => flashcardsListSortEnum.safeParse(v).success,
+      "Invalid sort value"
+    )
+    .transform((v) => v as z.infer<typeof flashcardsListSortEnum>),
+  source: z
+    .string()
+    .optional()
+    .transform((s) => (s === "" ? undefined : s))
+    .pipe(z.optional(sourceSchema)),
+});
+
+export type FlashcardsListQuery = z.infer<typeof flashcardsListQuerySchema>;
+
+/**
+ * Maps validated GET /flashcards query params to ListFlashcardsOptions for the service.
+ */
+function queryToOptions(parsed: FlashcardsListQuery): ListFlashcardsOptions {
+  const filter =
+    parsed.source != null ? { source: parsed.source } : undefined;
+  return {
+    page: parsed.page,
+    limit: parsed.limit,
+    sort: parsed.sort,
+    filter,
+  };
 }
 
 export const POST: APIRoute = async (context) => {
@@ -102,6 +162,52 @@ export const POST: APIRoute = async (context) => {
 
   if (result.success) {
     return json({ flashcards: result.data.flashcards }, 201);
+  }
+
+  return json(
+    { error: "Internal Server Error", message: result.errorMessage },
+    500
+  );
+};
+
+/**
+ * GET /api/flashcards
+ * Lists flashcards for the authenticated user. Query: page, limit, sort, optional source filter.
+ * Returns 200 with { data, pagination }; 400 on invalid params; 401 if unauthenticated; 500 on server error.
+ */
+export const GET: APIRoute = async (context) => {
+  const { request, locals } = context;
+  const supabase = locals.supabase;
+
+  const url = new URL(request.url);
+  const raw = Object.fromEntries(url.searchParams);
+
+  const parsed = flashcardsListQuerySchema.safeParse(raw);
+  if (!parsed.success) {
+    const details = parsed.error.flatten().fieldErrors;
+    return json(
+      {
+        error: "Bad Request",
+        message: "Invalid query parameters",
+        details,
+      },
+      400
+    );
+  }
+
+  const userId = DEFAULT_USER_ID;
+  if (!userId) {
+    return json(
+      { error: "Unauthorized", message: "Authentication required" },
+      401
+    );
+  }
+
+  const options = queryToOptions(parsed.data);
+  const result = await listFlashcards(supabase, userId, options);
+
+  if (result.success) {
+    return json(result.data, 200);
   }
 
   return json(
