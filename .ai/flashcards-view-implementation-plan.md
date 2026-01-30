@@ -2,7 +2,7 @@
 
 ## 1. Przegląd
 
-Widok **Moje fiszki** (`/flashcards`) umożliwia zalogowanemu użytkownikowi przeglądanie zapisanych fiszek, wyszukiwanie i filtrowanie ich, przeglądanie z podziałem na strony (paginacja) oraz edycję i usuwanie fiszek z poziomu interfejsu. Operacje edycji odbywają się w modalu z walidacją limitów znaków; usunięcie wymaga potwierdzenia. Widok realizuje wymagania US-003 i US-006 z PRD oraz spełnia założenia dostępności (m.in. obsługa klawiatury, potwierdzenia operacji).
+Widok **Moje fiszki** (`/flashcards`) umożliwia zalogowanemu użytkownikowi przeglądanie zapisanych fiszek, wyszukiwanie i filtrowanie ich, przeglądanie z podziałem na strony (paginacja) oraz edycję i usuwanie fiszek z poziomu interfejsu. Operacje edycji odbywają się w modalu z walidacją limitów znaków; usunięcie wymaga potwierdzenia. 
 
 ## 2. Routing widoku
 

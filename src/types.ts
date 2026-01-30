@@ -213,3 +213,23 @@ export interface FlashcardViewModel {
   /** UI status for bulk save (only accepted are saved by default). */
   status: "pending" | "accepted" | "rejected" | "edited";
 }
+
+// ------------------------------------------------------------------------------------------------
+// Session view types (Sesja powtórek)
+// ------------------------------------------------------------------------------------------------
+
+/** Ocena w sesji powtórek: 1 = Źle, 2 = Średnio, 3 = Dobrze. */
+export type SessionGrade = 1 | 2 | 3;
+
+export const SESSION_GRADE_AGAIN = 1 satisfies SessionGrade;
+export const SESSION_GRADE_GOOD = 2 satisfies SessionGrade;
+export const SESSION_GRADE_EASY = 3 satisfies SessionGrade;
+
+/**
+ * Pojedynczy wynik oceny w sesji (opcjonalnie na przyszłość — integracja z algorytmem powtórek).
+ */
+export interface SessionResult {
+  flashcardId: number;
+  grade: SessionGrade;
+  timestamp?: string;
+}
