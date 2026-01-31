@@ -1,0 +1,16 @@
+---
+import Layout from "../layouts/Layout.astro";
+import LoginForm from "../components/auth/LoginForm";
+const redirectUrl = Astro.url.searchParams.get("redirectTo") ?? undefined;
+const successMessage = Astro.url.searchParams.get("message") ?? undefined;
+---
+
+<Layout title="Logowanie">
+  <main
+    class="container mx-auto max-w-md px-4 py-8"
+    role="main"
+    aria-label="Logowanie"
+  >
+    <LoginForm client:load redirectTo={redirectUrl} successMessage={successMessage} />
+  </main>
+</Layout>

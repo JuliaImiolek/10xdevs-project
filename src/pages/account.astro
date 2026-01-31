@@ -1,0 +1,14 @@
+---
+import Layout from "../layouts/Layout.astro";
+import AccountSettingsView from "../components/auth/AccountSettingsView";
+---
+
+<Layout title="Ustawienia konta">
+  <main
+    class="container mx-auto max-w-4xl px-4 py-8"
+    role="main"
+    aria-label="Ustawienia konta"
+  >
+    <AccountSettingsView client:load />
+  </main>
+</Layout>

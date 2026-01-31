@@ -65,8 +65,15 @@ Użytkownicy doświadczają problemu polegającego na czasochłonnym, manualnym 
   - Użytkownik musi przejść proces logowania przed uzyskaniem dostępu do funkcjonalności aplikacji.
   - Możliwość zmiany hasła i usunięcia konta jest dostępna w ustawieniach konta.
   - System stosuje standardy autentykacji, autoryzacji oraz RLS.
+  - Logowanie i rejestracja odbywają się na dedykowanych stronach
 
-### US-006: Lista fiszek z wyszukiwarką i paginacją
+### US-006: Bezpieczny dostęp i autoryzacja 
+- Tytuł: Jako zalogowany użytkownik chcę mieć pewność, że moje fiszki nie są dostępne dla innych użytkowników, aby zachować prywatność i bezpieczeństwo danych. 
+- Kryteria akceptacji:
+  - Tylko zalogowany użytkownik może wyświetlać, edytować i usuwać swoje fiszki.
+  - Nie ma dostępu do fiszek innych użytkowników ani możliwości współdzielenia.
+
+### US-007: Lista fiszek z wyszukiwarką i paginacją
 - Tytuł: Przeglądanie i wyszukiwanie fiszek
 - Opis: Użytkownik ma dostęp do interfejsu listy fiszek, gdzie może wyszukiwać, filtrować oraz przeglądać fiszki z podziałem na strony.
 - Kryteria akceptacji:

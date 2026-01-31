@@ -1,0 +1,14 @@
+---
+import Layout from "../layouts/Layout.astro";
+import RegisterForm from "../components/auth/RegisterForm";
+---
+
+<Layout title="Rejestracja">
+  <main
+    class="container mx-auto max-w-md px-4 py-8"
+    role="main"
+    aria-label="Rejestracja"
+  >
+    <RegisterForm client:load />
+  </main>
+</Layout>

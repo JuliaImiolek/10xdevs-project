@@ -6,10 +6,11 @@ interface Props {
 }
 
 const { title = "10x Astro Starter" } = Astro.props;
+const userId = Astro.locals.userId;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="pl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -19,11 +20,26 @@ const { title = "10x Astro Starter" } = Astro.props;
   </head>
   <body>
     <nav class="border-b bg-background px-4 py-3" aria-label="Główna nawigacja">
-      <div class="container mx-auto max-w-4xl flex gap-6">
-        <a href="/" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Strona główna</a>
-        <a href="/generate" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Generuj fiszki</a>
-        <a href="/flashcards" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Moje fiszki</a>
-        <a href="/session" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Sesja nauki</a>
+      <div class="container mx-auto max-w-4xl flex flex-wrap items-center gap-6">
+        {userId ? (
+          <>
+            <a href="/" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Strona główna</a>
+            <a href="/generate" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Generuj fiszki</a>
+            <a href="/flashcards" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Moje fiszki</a>
+            <a href="/session" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Sesja nauki</a>
+            <a href="/account" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Ustawienia konta</a>
+            <form method="post" action="/api/auth/logout" class="inline">
+              <button type="submit" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors cursor-pointer bg-transparent border-0">
+                Wyloguj
+              </button>
+            </form>
+          </>
+        ) : (
+          <>
+            <a href="/login" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Zaloguj</a>
+            <a href="/register" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Zarejestruj</a>
+          </>
+        )}
       </div>
     </nav>
     <slot />
