@@ -1,11 +1,15 @@
 import * as React from "react";
 import type { FlashcardDto } from "@/types";
 import { updateFlashcard } from "@/lib/flashcards-api";
+import {
+  validateEditFlashcardForm,
+  FRONT_MAX,
+  BACK_MAX,
+  type EditFlashcardFormErrors,
+} from "@/lib/validations/edit-flashcard";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const FRONT_MAX = 200;
-const BACK_MAX = 500;
 const SOURCE_OPTIONS: { value: "ai-edited" | "manual"; label: string }[] = [
   { value: "ai-edited", label: "AI (edycja)" },
   { value: "manual", label: "Ręcznie" },
@@ -18,28 +22,6 @@ export interface EditFlashcardModalProps {
   onError: (message: string) => void;
 }
 
-interface FormErrors {
-  front?: string;
-  back?: string;
-  source?: string;
-}
-
-function validate(
-  front: string,
-  back: string,
-  source: "ai-edited" | "manual" | ""
-): FormErrors {
-  const errors: FormErrors = {};
-  const f = front.trim();
-  const b = back.trim();
-  if (f.length === 0) errors.front = "Pole jest wymagane.";
-  else if (f.length > FRONT_MAX) errors.front = `Maksymalnie ${FRONT_MAX} znaków.`;
-  if (b.length === 0) errors.back = "Pole jest wymagane.";
-  else if (b.length > BACK_MAX) errors.back = `Maksymalnie ${BACK_MAX} znaków.`;
-  if (source !== "ai-edited" && source !== "manual") errors.source = "Wybierz źródło.";
-  return errors;
-}
-
 export function EditFlashcardModal({
   flashcard,
   onClose,
@@ -49,7 +31,7 @@ export function EditFlashcardModal({
   const [front, setFront] = React.useState("");
   const [back, setBack] = React.useState("");
   const [source, setSource] = React.useState<"ai-edited" | "manual">("manual");
-  const [errors, setErrors] = React.useState<FormErrors>({});
+  const [errors, setErrors] = React.useState<EditFlashcardFormErrors>({});
   const [submitting, setSubmitting] = React.useState(false);
   const dialogRef = React.useRef<HTMLDialogElement>(null);
 
@@ -85,7 +67,7 @@ export function EditFlashcardModal({
   const handleSubmit = React.useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      const errs = validate(front, back, source);
+      const errs = validateEditFlashcardForm(front, back, source);
       if (Object.keys(errs).length > 0) {
         setErrors(errs);
         return;
@@ -111,7 +93,7 @@ export function EditFlashcardModal({
 
       const apiErr = result.error;
       if (apiErr.status === 400 && apiErr.details) {
-        const fieldErrors: FormErrors = {};
+        const fieldErrors: EditFlashcardFormErrors = {};
         if (apiErr.details.front?.[0]) fieldErrors.front = apiErr.details.front[0];
         if (apiErr.details.back?.[0]) fieldErrors.back = apiErr.details.back[0];
         if (apiErr.details.source?.[0]) fieldErrors.source = apiErr.details.source[0];

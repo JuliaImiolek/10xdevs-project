@@ -4,8 +4,8 @@
  */
 export function json(body: unknown, status: number, init?: ResponseInit): Response {
   return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json", ...init?.headers },
     ...init,
+    status,
+    headers: { ...init?.headers, "Content-Type": "application/json" },
   });
 }
