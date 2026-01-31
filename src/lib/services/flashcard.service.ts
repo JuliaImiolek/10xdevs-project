@@ -1,6 +1,7 @@
 /**
  * FlashcardService: creates flashcards in bulk via Supabase; lists and fetches by id for GET /api/flashcards.
  * Maps API source values to DB enum (MANUAL, AI-FULL, AI-EDITED).
+ * SRS columns (next_review_at, interval_days, repetitions, ease_factor) added by migration 20250131120000.
  */
 import type { SupabaseClient } from "../../db/supabase.client";
 import type { FlashcardInsert } from "../../types";
@@ -10,8 +11,21 @@ import type {
   FlashcardsListResponseDto,
 } from "../../types";
 import type { Database } from "../../db/database.types";
+import {
+  scheduleReview,
+  nextReviewAtFromInterval,
+  type SessionGradeUi,
+} from "../srs";
 
 type FlashcardRow = Database["public"]["Tables"]["flashcards"]["Row"];
+
+/** Row shape including SRS columns (DB has them after migration; types may lag). */
+type FlashcardRowWithSrs = FlashcardRow & {
+  next_review_at?: string | null;
+  interval_days?: number;
+  repetitions?: number;
+  ease_factor?: number;
+};
 
 // ------------------------------------------------------------------------------------------------
 // List & get by id — types and sort mapping (GET /flashcards, GET /flashcards/{id})
@@ -66,6 +80,17 @@ export type UpdateFlashcardResult =
 /** Result of deleteFlashcard: success, not found, or server error. */
 export type DeleteFlashcardResult =
   | { success: true; notFound?: false }
+  | { success: true; notFound: true }
+  | { success: false; errorMessage: string };
+
+/** Result of listFlashcardsForSession: success with FlashcardDto[] or server error. */
+export type ListFlashcardsForSessionResult =
+  | { success: true; data: FlashcardDto[] }
+  | { success: false; errorMessage: string };
+
+/** Result of recordReview: success, not found, or server error. */
+export type RecordReviewResult =
+  | { success: true }
   | { success: true; notFound: true }
   | { success: false; errorMessage: string };
 
@@ -341,6 +366,99 @@ export async function deleteFlashcard(
   const count = deletedRows?.length ?? 0;
   if (count === 0) {
     return { success: true, notFound: true };
+  }
+
+  return { success: true };
+}
+
+const SESSION_DEFAULT_LIMIT = 50;
+
+/**
+ * Lists flashcards due for review (next_review_at is null or <= now()) for the given user.
+ * Order: next_review_at ASC NULLS FIRST. Used by GET /api/flashcards?forSession=true.
+ *
+ * @param supabase - Supabase client (from context.locals)
+ * @param userId - Current user ID
+ * @param limit - Max cards to return (default SESSION_DEFAULT_LIMIT)
+ */
+export async function listFlashcardsForSession(
+  supabase: SupabaseClient,
+  userId: string,
+  limit: number = SESSION_DEFAULT_LIMIT
+): Promise<ListFlashcardsForSessionResult> {
+  const now = new Date().toISOString();
+  const { data: rows, error } = await supabase
+    .from("flashcards")
+    .select("*")
+    .eq("user_id", userId)
+    .or(`next_review_at.is.null,next_review_at.lte.${now}`)
+    .order("next_review_at", { ascending: true, nullsFirst: true })
+    .limit(limit);
+
+  if (error) {
+    console.error("[FlashcardService] listFlashcardsForSession error:", error.message);
+    return { success: false, errorMessage: "Failed to list flashcards for session" };
+  }
+
+  const data = (rows ?? []).map((row) => rowToFlashcardDto(row as FlashcardRow));
+  return { success: true, data };
+}
+
+/**
+ * Records a review (SM-2) for a flashcard and updates next_review_at, interval_days, repetitions, ease_factor.
+ *
+ * @param supabase - Supabase client (from context.locals)
+ * @param userId - Current user ID
+ * @param id - Flashcard id
+ * @param grade - Session grade (1 = Źle, 2 = Średnio, 3 = Dobrze)
+ */
+export async function recordReview(
+  supabase: SupabaseClient,
+  userId: string,
+  id: number,
+  grade: SessionGradeUi
+): Promise<RecordReviewResult> {
+  const { data: row, error: fetchError } = await supabase
+    .from("flashcards")
+    .select("id, interval_days, repetitions, ease_factor")
+    .eq("id", id)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (fetchError) {
+    console.error("[FlashcardService] recordReview fetch error:", fetchError.message);
+    return { success: false, errorMessage: "Failed to fetch flashcard" };
+  }
+
+  if (row === null) {
+    return { success: true, notFound: true };
+  }
+
+  const r = row as { interval_days?: number; repetitions?: number; ease_factor?: number };
+  const state = {
+    interval: r.interval_days ?? 0,
+    repetition: r.repetitions ?? 0,
+    efactor: r.ease_factor ?? 2.5,
+  };
+  const next = scheduleReview(grade, state);
+  const nextReviewAt = nextReviewAtFromInterval(next.interval);
+
+  const updatePayload = {
+    next_review_at: nextReviewAt.toISOString(),
+    interval_days: next.interval,
+    repetitions: next.repetition,
+    ease_factor: next.efactor,
+  };
+
+  const { error: updateError } = await supabase
+    .from("flashcards")
+    .update(updatePayload)
+    .eq("id", id)
+    .eq("user_id", userId);
+
+  if (updateError) {
+    console.error("[FlashcardService] recordReview update error:", updateError.message);
+    return { success: false, errorMessage: "Failed to save review" };
   }
 
   return { success: true };

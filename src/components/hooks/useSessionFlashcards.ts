@@ -5,6 +5,8 @@ import { fetchFlashcardsList } from "@/lib/flashcards-api";
 const SESSION_PAGE = 1;
 const SESSION_LIMIT = 50;
 const SESSION_SORT = "created_at_desc" as const;
+/** Fetches only cards due for review (SRS: next_review_at null or <= now). */
+const SESSION_FOR_SESSION = true;
 
 export interface UseSessionFlashcardsResult {
   data: FlashcardDto[];
@@ -31,6 +33,7 @@ export function useSessionFlashcards(): UseSessionFlashcardsResult {
       page: SESSION_PAGE,
       limit: SESSION_LIMIT,
       sort: SESSION_SORT,
+      forSession: SESSION_FOR_SESSION,
     });
 
     setLoading(false);

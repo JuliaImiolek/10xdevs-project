@@ -101,6 +101,8 @@ export interface FlashcardsListQueryParams {
   limit: number;
   sort: FlashcardsListSort;
   source?: "manual" | "ai-full" | "ai-edited";
+  /** When true, returns only cards due for SRS session (next_review_at null or <= now). */
+  forSession?: boolean;
 }
 
 // ------------------------------------------------------------------------------------------------

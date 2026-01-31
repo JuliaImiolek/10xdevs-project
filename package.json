@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "seed:user": "node --env-file=.env scripts/seed-default-user.mjs"
+    "seed:user": "node --env-file=.env scripts/seed-default-user.mjs",
+    "check-mvp": "node scripts/check-mvp.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^9.4.3",
@@ -33,6 +34,7 @@
     "lucide-react": "^0.487.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "supermemo": "^2.0.23",
     "tailwind-merge": "^3.1.0",
     "tailwindcss": "^4.1.13",
     "tw-animate-css": "^1.2.5",

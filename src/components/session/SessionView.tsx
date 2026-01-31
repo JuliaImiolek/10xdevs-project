@@ -1,6 +1,7 @@
 import * as React from "react";
 import type { SessionGrade } from "@/types";
 import { useSessionFlashcards } from "@/components/hooks/useSessionFlashcards";
+import { submitReview } from "@/lib/flashcards-api";
 import { SessionProgress } from "./SessionProgress";
 import { SessionCard } from "./SessionCard";
 import { SessionControls } from "./SessionControls";
@@ -38,16 +39,23 @@ export default function SessionView() {
     setRevealed(true);
   }, []);
 
-  const handleRate = React.useCallback((_grade: SessionGrade) => {
-    setRevealed(false);
-    setCurrentIndex((prev) => {
-      const next = prev + 1;
-      if (next >= cards.length) {
-        setSessionEnded(true);
+  const handleRate = React.useCallback(
+    async (grade: SessionGrade) => {
+      const card = cards[currentIndex];
+      if (card) {
+        await submitReview(card.id, grade);
       }
-      return next;
-    });
-  }, [cards.length]);
+      setRevealed(false);
+      setCurrentIndex((prev) => {
+        const next = prev + 1;
+        if (next >= cards.length) {
+          setSessionEnded(true);
+        }
+        return next;
+      });
+    },
+    [cards, currentIndex]
+  );
 
   const handleSkip = React.useCallback(() => {
     setRevealed(false);

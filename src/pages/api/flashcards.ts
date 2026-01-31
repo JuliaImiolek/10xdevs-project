@@ -9,6 +9,7 @@ import { json } from "../../lib/api-response";
 import {
   createFlashcards,
   listFlashcards,
+  listFlashcardsForSession,
   type ListFlashcardsOptions,
 } from "../../lib/services/flashcard.service";
 
@@ -101,6 +102,10 @@ export const flashcardsListQuerySchema = z.object({
     .optional()
     .transform((s) => (s === "" ? undefined : s))
     .pipe(z.optional(sourceSchema)),
+  forSession: z
+    .union([z.string(), z.boolean(), z.undefined()])
+    .optional()
+    .transform((v) => v === true || v === "true" || v === "1"),
 });
 
 export type FlashcardsListQuery = z.infer<typeof flashcardsListQuerySchema>;
@@ -197,6 +202,24 @@ export const GET: APIRoute = async (context) => {
     return json(
       { error: "Unauthorized", message: "Authentication required" },
       401
+    );
+  }
+
+  if (parsed.data.forSession) {
+    const limit = Math.min(parsed.data.limit, 100);
+    const result = await listFlashcardsForSession(supabase, userId, limit);
+    if (!result.success) {
+      return json(
+        { error: "Internal Server Error", message: result.errorMessage },
+        500
+      );
+    }
+    return json(
+      {
+        data: result.data,
+        pagination: { page: 1, limit: result.data.length, total: result.data.length },
+      },
+      200
     );
   }
 

@@ -41,6 +41,9 @@ function buildListUrl(params: FlashcardsListQueryParams): string {
   if (params.source != null) {
     search.set("source", params.source);
   }
+  if (params.forSession === true) {
+    search.set("forSession", "true");
+  }
   return `/api/flashcards?${search.toString()}`;
 }
 
@@ -155,6 +158,43 @@ export async function createFlashcards(
       error: err.error,
       message: err.message,
       details: err.details,
+    },
+  };
+}
+
+/**
+ * POST /api/flashcards/{id}/review – record SRS review (grade 1–3: Źle, Średnio, Dobrze).
+ */
+export type ReviewResult =
+  | { ok: true }
+  | { ok: false; error: ApiError };
+
+export async function submitReview(
+  id: number,
+  grade: 1 | 2 | 3
+): Promise<ReviewResult> {
+  const response = await fetch(`/api/flashcards/${id}/review`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ grade }),
+  });
+
+  const body = await parseJsonResponse<{ ok?: boolean; error?: string; message?: string }>(
+    response
+  );
+
+  if (response.ok && body && body.ok !== false) {
+    return { ok: true };
+  }
+
+  const err = body as { error?: string; message?: string };
+  return {
+    ok: false,
+    error: {
+      status: response.status,
+      error: err.error,
+      message: err.message,
     },
   };
 }
