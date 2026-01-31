@@ -1,6 +1,6 @@
-# Composite action: checkout + setup Node (from .nvmrc) + npm ci
-# Reusable for lint, test, build jobs
-description: "Checkout repo, setup Node from .nvmrc, install dependencies with npm ci"
+# Composite action: setup Node (from .nvmrc) + npm ci
+# Requires checkout to be run first (needed for local actions to resolve).
+description: "Setup Node from .nvmrc, install dependencies with npm ci"
 inputs:
   node-version-file:
     description: "Path to Node version file (e.g. .nvmrc)"
@@ -9,9 +9,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
     - name: Setup Node
       uses: actions/setup-node@v4
       with:

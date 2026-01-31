@@ -25,7 +25,10 @@ jobs:
     outputs:
       pct: ${{ steps.coverage_summary.outputs.pct }}
     steps:
-      - name: Setup (checkout, Node, npm ci)
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup (Node, npm ci)
         uses: ./.github/actions/setup-node
         with:
           node-version-file: .nvmrc
