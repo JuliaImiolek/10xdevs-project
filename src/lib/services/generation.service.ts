@@ -1,6 +1,7 @@
 /**
  * GenerationService: orchestrates AI flashcard generation, DB writes for generations
  * and optional flashcards, and error logging to generation_error_logs.
+ * Uses OpenRouterService for LLM-based flashcard proposals.
  */
 import { createHash } from "node:crypto";
 import type { SupabaseClient } from "../../db/supabase.client";
@@ -14,11 +15,30 @@ import type {
   GenerationsListResponseDto,
 } from "../../types";
 import type { GenerationRequestInput } from "../../pages/api/generations";
+import { OpenRouterService } from "./openrouter.service";
 
 type TablesInsert = Database["public"]["Tables"];
 
-/** Default AI model name used for generation (stored in generations.model) */
-const DEFAULT_MODEL = "openrouter/default";
+/** Default AI model name used for generation (stored in generations.model). Aligns with OpenRouter. */
+const DEFAULT_MODEL = "openai/gpt-oss-120b:free";
+
+/** Expected JSON shape from LLM: object with "flashcards" array of { front, back }. */
+interface LlmFlashcardsResponse {
+  flashcards?: Array<{ front?: string; back?: string }>;
+}
+
+/** System prompt for flashcard generation: instructs LLM to return JSON only. */
+const FLASHCARD_SYSTEM_PROMPT = `You are a flashcard generator. Given a text (e.g. article, notes), produce a list of flashcards.
+Each flashcard has:
+- "front": short question or term (concise, max ~200 chars).
+- "back": short answer or definition (concise, max ~500 chars).
+
+Return ONLY valid JSON, no other text. Use this exact structure:
+{"flashcards": [{"front": "...", "back": "..."}, ...]}
+
+Generate a reasonable number of flashcards (typically 3–15) based on the content. Focus on key concepts and facts.`;
+
+const openRouter = new OpenRouterService();
 
 /**
  * MD5 hash for source_text (for storage; used in generations and generation_error_logs).
@@ -27,20 +47,62 @@ function sourceTextHash(text: string): string {
   return createHash("md5").update(text, "utf8").digest("hex");
 }
 
+/** Result of calling OpenRouter for flashcard proposals. */
+type CallOpenRouterResult =
+  | { success: true; proposals: FlashcardProposalDto[] }
+  | { success: false; errorCode: string; errorMessage: string };
+
 /**
- * Mock AI service: returns deterministic mock flashcard proposals for development.
- * Kept as mocks until real AI integration (e.g. OpenRouter) is wired.
+ * Calls OpenRouter LLM to generate flashcard proposals from source text.
+ * Returns proposals or error details for logging and API response.
  */
-async function callAiForFlashcards(
+async function callOpenRouterForFlashcards(
   sourceText: string,
-  _model: string
-): Promise<FlashcardProposalDto[]> {
-  const len = Math.min(5, Math.max(2, Math.floor(sourceText.length / 500)));
-  return Array.from({ length: len }, (_, i) => ({
-    front: `Mock question ${i + 1} (from ${sourceText.length} chars)`,
-    back: `Mock answer ${i + 1}`,
-    source: "ai-full" as const,
-  }));
+  model: string
+): Promise<CallOpenRouterResult> {
+  const result = await openRouter.chatWithStructuredOutput<LlmFlashcardsResponse>({
+    systemMessage: FLASHCARD_SYSTEM_PROMPT,
+    userMessage: sourceText,
+    model,
+    responseFormat: { type: "json_object" },
+    max_tokens: 4096,
+    temperature: 0.3,
+  });
+
+  if (!result.success) {
+    return {
+      success: false,
+      errorCode: String(result.errorCode),
+      errorMessage: result.errorMessage,
+    };
+  }
+
+  const raw = result.data?.flashcards;
+  if (!Array.isArray(raw) || raw.length === 0) {
+    return {
+      success: false,
+      errorCode: "INVALID_RESPONSE",
+      errorMessage: "Model did not return a non-empty flashcards array",
+    };
+  }
+
+  const proposals: FlashcardProposalDto[] = raw
+    .filter((item) => item != null && (item.front != null || item.back != null))
+    .map((item) => ({
+      front: String(item.front ?? "").trim() || "?",
+      back: String(item.back ?? "").trim() || "?",
+      source: "ai-full" as const,
+    }));
+
+  if (proposals.length === 0) {
+    return {
+      success: false,
+      errorCode: "INVALID_RESPONSE",
+      errorMessage: "No valid flashcard entries in model response",
+    };
+  }
+
+  return { success: true, proposals };
 }
 
 export type CreateGenerationResult =
@@ -109,15 +171,11 @@ export type GetGenerationByIdResult =
   | { success: true; data: null }
   | { success: false; errorMessage: string };
 
-/** When true, skip all DB writes and return mock response (no auth/user in auth.users needed). */
-const isMockGenerations = () =>
-  import.meta.env.MOCK_GENERATIONS === "true" || import.meta.env.MOCK_GENERATIONS === "1";
-
 /**
  * Creates a generation: calls AI, inserts into generations, optionally inserts flashcards,
  * and returns the response DTO. On AI failure, logs to generation_error_logs and returns
  * ai_error (caller should respond with 599).
- * When MOCK_GENERATIONS=true, skips DB writes and returns mock data (no user_id FK required).
+ * Requires DEFAULT_USER_ID to exist in auth.users (run scripts/seed-default-user.mjs once).
  */
 export async function createGeneration(
   supabase: SupabaseClient,
@@ -131,40 +189,26 @@ export async function createGeneration(
 
   const startTime = Date.now();
 
-  let proposals: FlashcardProposalDto[];
-  try {
-    proposals = await callAiForFlashcards(source_text, model);
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    const errorCode = "AI_CALL_FAILED";
-    if (!isMockGenerations()) {
-      await logGenerationError(supabase, {
-        user_id: userId,
-        model,
-        source_text_hash: sourceTextHashValue,
-        source_text_length: sourceTextLength,
-        error_code: errorCode,
-        error_message: errorMessage,
-        generation_id: null,
-      });
-    }
+  const aiResult = await callOpenRouterForFlashcards(source_text, model);
+  if (!aiResult.success) {
+    await logGenerationError(supabase, {
+      user_id: userId,
+      model,
+      source_text_hash: sourceTextHashValue,
+      source_text_length: sourceTextLength,
+      error_code: aiResult.errorCode,
+      error_message: aiResult.errorMessage,
+      generation_id: null,
+    });
     return {
       success: false,
       kind: "ai_error",
-      errorCode,
-      errorMessage,
+      errorCode: aiResult.errorCode,
+      errorMessage: aiResult.errorMessage,
     };
   }
 
-  if (isMockGenerations()) {
-    const response: GenerationCreateResponseDto = {
-      generation_id: 0,
-      flashcards_proposals: proposals,
-      generated_count: proposals.length,
-    };
-    return { success: true, data: response };
-  }
-
+  const proposals = aiResult.proposals;
   const generationDurationMs = Date.now() - startTime;
 
   const generationInsert: TablesInsert["generations"]["Insert"] = {
@@ -185,20 +229,6 @@ export async function createGeneration(
     .single();
 
   if (genError) {
-    // Fallback: when user_id is not in auth.users (FK), return mock response so endpoint works without DB/auth setup
-    const isFkError =
-      genError.message?.includes("foreign key constraint") &&
-      genError.message?.includes("generations_user_id_fkey");
-    if (isFkError) {
-      return {
-        success: true,
-        data: {
-          generation_id: 0,
-          flashcards_proposals: proposals,
-          generated_count: proposals.length,
-        },
-      };
-    }
     return {
       success: false,
       kind: "db_error",

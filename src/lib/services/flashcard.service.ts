@@ -154,23 +154,6 @@ export async function createFlashcards(
     .select();
 
   if (error) {
-    // Fallback: when user_id is not in users (FK), return mock response so endpoint works without DB/auth setup (same as POST /generations)
-    const isFkError =
-      error.message?.includes("foreign key constraint") &&
-      error.message?.includes("flashcards_user_id_fkey");
-    if (isFkError) {
-      const now = new Date().toISOString();
-      const mockFlashcards: FlashcardDto[] = command.flashcards.map((f, index) => ({
-        id: -(index + 1),
-        front: f.front,
-        back: f.back,
-        source: f.source,
-        generation_id: f.generation_id,
-        created_at: now,
-        updated_at: now,
-      }));
-      return { success: true, data: { flashcards: mockFlashcards } };
-    }
     console.error("[FlashcardService] insert error:", error.message);
     return {
       success: false,

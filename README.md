@@ -41,6 +41,16 @@ npm run dev
 npm run build
 ```
 
+### Local development with Supabase (generations & flashcards)
+
+Auth is not implemented; the app uses a default user ID. For generations and flashcards to save to the database:
+
+1. Start Supabase locally: `npx supabase start`
+2. Add `SUPABASE_SERVICE_ROLE_KEY` to `.env` (from `npx supabase status` → Secret key)
+3. Seed the default user once: `npm run seed:user`
+
+After that, `DEFAULT_USER_ID` (from `.env` or fallback in code) will exist in `auth.users` and FK constraints will pass.
+
 ## Available Scripts
 
 - `npm run dev` - Start development server
@@ -48,6 +58,7 @@ npm run build
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues
+- `npm run seed:user` - Seed default user in Supabase auth (required once for generations and flashcards; needs `SUPABASE_SERVICE_ROLE_KEY` in `.env`)
 
 ## Project Structure
 

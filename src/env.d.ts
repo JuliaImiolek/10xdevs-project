@@ -19,8 +19,6 @@ interface ImportMetaEnv {
   readonly DEFAULT_USER_ID?: string;
   /** Service role key; used only by scripts/seed-default-user.mjs (never in app). */
   readonly SUPABASE_SERVICE_ROLE_KEY?: string;
-  /** When "true", skip DB writes for generations; returns mock response (no auth/user needed). */
-  readonly MOCK_GENERATIONS?: string;
   /** When "true" or "1", GET /generation-error-logs is restricted to administrators only (403 for non-admins). */
   readonly GENERATION_ERROR_LOGS_ADMIN_ONLY?: string;
   /** Comma-separated list of user IDs allowed as admins when GENERATION_ERROR_LOGS_ADMIN_ONLY is set. If unset, DEFAULT_USER_ID is treated as the only admin. */

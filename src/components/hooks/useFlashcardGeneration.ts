@@ -95,7 +95,18 @@ function useFlashcardGeneration(): UseFlashcardGenerationResult {
         setFlashcards(viewModels);
       })
       .catch((err) => {
-        setApiError(err instanceof Error ? err.message : "Wystąpił błąd.");
+        const message =
+          err instanceof Error ? err.message : "Wystąpił błąd.";
+        // Network/connection errors (e.g. dev server not running, wrong origin)
+        const isNetworkError =
+          message === "fetch failed" ||
+          message.includes("Failed to fetch") ||
+          message.includes("NetworkError");
+        setApiError(
+          isNetworkError
+            ? "Nie można połączyć z serwerem. Upewnij się, że aplikacja jest uruchomiona (npm run dev) i otwarta pod tym samym adresem."
+            : message
+        );
       })
       .finally(() => {
         setLoading(false);

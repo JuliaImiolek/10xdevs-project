@@ -245,6 +245,14 @@ export const POST: APIRoute = async (context) => {
   const { request, locals } = context;
   const supabase = locals.supabase;
 
+  if (!supabase) {
+    console.error("[POST /api/generations] supabase client missing on locals");
+    return json(
+      { error: "Internal Server Error", message: "Server configuration error" },
+      500
+    );
+  }
+
   // Parse and validate body
   let body: unknown;
   try {
@@ -267,7 +275,30 @@ export const POST: APIRoute = async (context) => {
     );
   }
 
-  const result = await createGeneration(supabase, DEFAULT_USER_ID, parsed.data);
+  let result: Awaited<ReturnType<typeof createGeneration>>;
+  try {
+    result = await createGeneration(supabase, DEFAULT_USER_ID, parsed.data);
+  } catch (err) {
+    const rawMessage =
+      err instanceof Error ? err.message : "Unexpected error during generation";
+    const causeMessage =
+      err instanceof Error && err.cause instanceof Error
+        ? err.cause.message
+        : null;
+    console.error("[POST /api/generations]", err);
+    if (causeMessage) {
+      console.error("[POST /api/generations] cause:", causeMessage);
+    }
+    // Map generic "fetch failed" to a clearer message (OpenRouter/Supabase network or timeout)
+    const message =
+      rawMessage === "fetch failed" || rawMessage.includes("fetch failed")
+        ? "Request to an external service failed (network, DNS, or timeout). Check OPENROUTER_API_KEY and connectivity; slow models may need more time."
+        : rawMessage;
+    return json(
+      { error: "Internal Server Error", message },
+      500
+    );
+  }
 
   if (result.success) {
     return json(result.data, 201);
@@ -284,8 +315,13 @@ export const POST: APIRoute = async (context) => {
     );
   }
 
+  // result.kind === "db_error"
+  console.error("[POST /api/generations] DB error:", result.errorMessage);
+  const message = result.errorMessage?.includes("fetch failed")
+    ? "Database connection failed (Supabase unreachable). Check SUPABASE_URL and SUPABASE_KEY in .env and that the Supabase project is not paused."
+    : (result.errorMessage ?? "Database error");
   return json(
-    { error: "Internal Server Error", message: result.errorMessage },
+    { error: "Internal Server Error", message },
     500
   );
 };

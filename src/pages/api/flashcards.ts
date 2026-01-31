@@ -25,7 +25,12 @@ const flashcardCreateItemSchema = z
     front: z.string().min(1, "front is required").max(200, "front must be at most 200 characters"),
     back: z.string().min(1, "back is required").max(500, "back must be at most 500 characters"),
     source: sourceSchema,
-    generation_id: z.number().int().positive().nullable(),
+    // Accept 0 and undefined as null (legacy / optional field)
+    generation_id: z
+      .preprocess(
+        (val) => (val === 0 || val === undefined ? null : val),
+        z.union([z.number().int().positive(), z.null()])
+      ),
   })
   .superRefine((data, ctx) => {
     if (data.source === "manual") {
@@ -36,15 +41,8 @@ const flashcardCreateItemSchema = z
           path: ["generation_id"],
         });
       }
-    } else {
-      if (data.generation_id === null || data.generation_id === undefined) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "generation_id is required when source is ai-full or ai-edited",
-          path: ["generation_id"],
-        });
-      }
     }
+    // For ai-full/ai-edited, null is allowed (e.g. when not linked to a generation)
   });
 
 export const flashcardsCreateRequestSchema = z.object({
