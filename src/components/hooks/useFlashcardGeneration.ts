@@ -41,7 +41,9 @@ function useFlashcardGeneration(): UseFlashcardGenerationResult {
   const validateText = React.useCallback((): boolean => {
     const len = text.length;
     if (len === 0) {
-      setTextError(null);
+      setTextError(
+        `Tekst musi mieć co najmniej ${TEXT_INPUT_MIN_LENGTH} znaków (aktualnie: 0).`
+      );
       return false;
     }
     if (len < TEXT_INPUT_MIN_LENGTH) {

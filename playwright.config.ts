@@ -1,5 +1,8 @@
+import path from "node:path";
 import { defineConfig, devices } from "@playwright/test";
+import dotenv from "dotenv";
 
+dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
 /**
  * Playwright E2E configuration.
  * Chromium/Desktop Chrome only (per project guidelines).
@@ -13,15 +16,15 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: "html",
   use: {
-    baseURL: "http://localhost:4321",
+    baseURL: "http://localhost:3000",
     trace: "on-first-retry",
   },
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
   ],
   webServer: {
-    command: "npm run preview",
-    url: "http://localhost:4321",
+    command: "npm run preview -- --port 3000",
+    url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
   },
 });
