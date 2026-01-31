@@ -11,6 +11,9 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup (checkout, Node, npm ci)
         uses: ./.github/actions/setup-node
         with:
@@ -25,6 +28,9 @@ jobs:
     outputs:
       pct: ${{ steps.coverage_summary.outputs.pct }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup (checkout, Node, npm ci)
         uses: ./.github/actions/setup-node
         with:
