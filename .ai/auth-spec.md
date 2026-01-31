@@ -8,7 +8,7 @@ Dokument opisuje architekturę i kontrakty modułu uwierzytelniania zgodnie z US
 |------------|------------------------|
 | **US-005** (zarządzanie kontem, uwierzytelnianie) | Logowanie i rejestracja na dedykowanych stronach `/login`, `/register`; zmiana hasła i usunięcie konta na `/account`; middleware wymusza logowanie przed dostępem do funkcjonalności; Supabase Auth + RLS (p. 3.4). |
 | **US-006** (bezpieczny dostęp, autoryzacja) | Ścieżki chronione wymagają `context.locals.userId`; API fiszek i generacji filtruje po `userId`; RLS na tabelach; brak współdzielenia (p. 2.4, 3.4). |
-| **US-001–US-004, US-007** (funkcjonalność fiszek i generacji) | Nie są zmieniane; dostęp do nich wymaga zalogowania (middleware chroni `/`, `/generate`, `/flashcards`, `/session`), więc realizacja US-005/US-006 zapewnia, że te historyjki działają wyłącznie dla zalogowanych użytkowników. |
+| **US-001–US-004, US-007** (funkcjonalność fiszek i generacji) | Nie są zmieniane; dostęp do nich wymaga zalogowania (middleware chroni `/generate`, `/flashcards`, `/session`; strona główna `/` jest ogólnodostępna), więc realizacja US-005/US-006 zapewnia, że te historyjki działają wyłącznie dla zalogowanych użytkowników. |
 
 Wymagania funkcjonalne z sekcji 3 PRD („logowanie, zmiana hasła oraz usuwanie konta”) oraz zdanie „Logowanie i rejestracja odbywają się na dedykowanych stronach” z US-005 są w pełni pokryte przez opisane strony, endpointy i przepływy. Odzyskiwanie hasła (`/forgot-password`, `/reset-password`) nie jest wymienione w PRD explicite, ale stanowi standardową część „prostego systemu kont” i nie koliduje z żadnym wymaganiem.
 
@@ -30,12 +30,13 @@ Wymagania funkcjonalne z sekcji 3 PRD („logowanie, zmiana hasła oraz usuwanie
 
 **Strony istniejące – rozszerzenie:**
 
-- **`/`, `/generate`, `/flashcards`, `/session`** — bez zmiany ścieżek; dostęp do `/generate`, `/flashcards`, `/session` wymaga zalogowania (middleware). Strony te nie muszą same sprawdzać sesji; otrzymują `userId` z `Astro.locals` tam, gdzie jest potrzebne do SSR (jeśli w przyszłości będzie używane).
+- **`/`** — strona główna; **ogólnodostępna** (bez logowania). Middleware nie przekierowuje niezalogowanych z `/`.
+- **`/generate`, `/flashcards`, `/session`** — bez zmiany ścieżek; dostęp wymaga zalogowania (middleware). Strony te nie muszą same sprawdzać sesji; otrzymują `userId` z `Astro.locals` tam, gdzie jest potrzebne do SSR (jeśli w przyszłości będzie używane).
 - **Layout** — rozszerzenie nawigacji o stan auth: dla niezalogowanych — linki „Zaloguj” / „Zarejestruj”; dla zalogowanych — link „Ustawienia konta” oraz akcja „Wyloguj”.
 
 **Strona główna (`/`):** 
 
-Strona główna jest dostępna tylko dla zalogowanych użytkowników (middleware przekierowuje niezalogowanych na `/login`). Po zalogowaniu lub rejestracji użytkownik jest przekierowywany na `/generate`.
+Strona główna jest **ogólnodostępna** (publiczna). Zarówno zalogowani, jak i niezalogowani użytkownicy mogą ją przeglądać. Middleware nie wymusza logowania na `/`. Po zalogowaniu lub rejestracji użytkownik jest przekierowywany na `/generate`.
 
 ### 1.2. Layouty i tryb auth / non-auth
 
@@ -174,7 +175,7 @@ Schematy Zod w plikach endpointów lub w współdzielonym module `src/lib/valida
 1. Na początku żądania: utworzenie klienta Supabase dla serwera z cookies (request).
 2. Pobranie użytkownika: `getUser()` (lub po odświeżeniu sesji odpowiednik), ustawienie `context.locals.userId = user?.id ?? undefined` i `context.locals.supabase = supabase`.
 3. Odświeżenie tokena: zgodnie z dokumentacją `@supabase/ssr` — po wywołaniach auth, zaktualizowane cookies muszą trafić do response (setAll na obiekcie response).
-4. Ścieżki chronione (`/`, `/generate`, `/flashcards`, `/flashcards/*`, `/session`, `/session/*`, `/account`): jeśli `!context.locals.userId` → `context.redirect('/login?redirectTo=' + encodeURIComponent(pathname))`.
+4. Ścieżki chronione (`/generate`, `/flashcards`, `/flashcards/*`, `/session`, `/session/*`, `/account`): jeśli `!context.locals.userId` → `context.redirect('/login?redirectTo=' + encodeURIComponent(pathname))`. Strona główna `/` nie jest chroniona — jest ogólnodostępna.
 5. Ścieżki „tylko dla gości” (`/login`, `/register`, `/forgot-password`): jeśli `context.locals.userId` → redirect na `redirectTo` z query lub na `/generate` (zgodnie z założeniem, że po zalogowaniu użytkownik trafia na `/generate`).
 6. Wywołanie `next()`.
 

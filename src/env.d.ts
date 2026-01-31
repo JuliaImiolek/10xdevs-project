@@ -19,8 +19,10 @@ interface ImportMetaEnv {
   readonly SUPABASE_KEY: string;
   readonly OPENROUTER_API_KEY: string;
   readonly DEFAULT_USER_ID?: string;
-  /** Service role key; used only by scripts/seed-default-user.mjs (never in app). */
+  /** Service role key; used by scripts and by POST /api/auth/delete-account. */
   readonly SUPABASE_SERVICE_ROLE_KEY?: string;
+  /** Public URL of the app (e.g. https://example.com); used for auth redirects (forgot-password). */
+  readonly SITE_URL?: string;
   /** When "true" or "1", GET /generation-error-logs is restricted to administrators only (403 for non-admins). */
   readonly GENERATION_ERROR_LOGS_ADMIN_ONLY?: string;
   /** Comma-separated list of user IDs allowed as admins when GENERATION_ERROR_LOGS_ADMIN_ONLY is set. If unset, DEFAULT_USER_ID is treated as the only admin. */

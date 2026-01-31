@@ -59,7 +59,7 @@ function RegisterForm() {
         if (res.ok) {
           setSuccessMessage(
             data?.message ??
-              "Konto zostało utworzone. Sprawdź skrzynkę e-mail w celu potwierdzenia (jeśli włączone). Możesz się teraz zalogować."
+              "Konto zostało utworzone. Na podany adres e-mail wysłaliśmy link do potwierdzenia konta — sprawdź skrzynkę (także folder „Oferty” lub „Spam”). Po potwierdzeniu możesz się zalogować."
           );
           setEmail("");
           setPassword("");

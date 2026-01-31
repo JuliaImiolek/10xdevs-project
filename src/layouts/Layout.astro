@@ -1,12 +1,17 @@
 ---
 import "../styles/global.css";
+import { LogoutButton } from "../components/auth/LogoutButton";
 
 interface Props {
   title?: string;
 }
 
 const { title = "10x Astro Starter" } = Astro.props;
+
+// Weryfikacja stanu użytkownika z middleware (Supabase session → Astro.locals)
+const user = Astro.locals.user;
 const userId = Astro.locals.userId;
+const isLoggedIn = Boolean(userId ?? user?.id);
 ---
 
 <!doctype html>
@@ -21,18 +26,14 @@ const userId = Astro.locals.userId;
   <body>
     <nav class="border-b bg-background px-4 py-3" aria-label="Główna nawigacja">
       <div class="container mx-auto max-w-4xl flex flex-wrap items-center gap-6">
-        {userId ? (
+        {isLoggedIn ? (
           <>
             <a href="/" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Strona główna</a>
             <a href="/generate" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Generuj fiszki</a>
             <a href="/flashcards" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Moje fiszki</a>
             <a href="/session" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Sesja nauki</a>
             <a href="/account" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Ustawienia konta</a>
-            <form method="post" action="/api/auth/logout" class="inline">
-              <button type="submit" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors cursor-pointer bg-transparent border-0">
-                Wyloguj
-              </button>
-            </form>
+            <LogoutButton client:load />
           </>
         ) : (
           <>

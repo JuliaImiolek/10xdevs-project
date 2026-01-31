@@ -15,14 +15,27 @@ import {
   validatePasswordConfirm,
 } from "@/lib/validations/auth";
 
+function parseAccessTokenFromHash(): string {
+  if (typeof window === "undefined") return "";
+  const hash = window.location.hash?.replace(/^#/, "") ?? "";
+  const params = new URLSearchParams(hash);
+  return params.get("access_token") ?? "";
+}
+
 export interface ResetPasswordFormProps {
-  /** Token z linku e-mail (query reset-password?token=...). */
+  /** Token z linku e-mail (query reset-password?token=... lub z fragmentu #access_token=... po przekierowaniu Supabase). */
   token: string;
 }
 
-function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+function ResetPasswordForm({ token: tokenProp }: ResetPasswordFormProps) {
   const passwordId = React.useId();
   const confirmId = React.useId();
+
+  const [tokenFromHash, setTokenFromHash] = React.useState("");
+  React.useEffect(() => {
+    if (!tokenProp?.trim()) setTokenFromHash(parseAccessTokenFromHash());
+  }, [tokenProp]);
+  const token = (tokenProp?.trim() ? tokenProp : tokenFromHash) || "";
 
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");

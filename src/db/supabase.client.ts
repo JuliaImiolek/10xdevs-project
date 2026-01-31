@@ -59,6 +59,24 @@ export type SupabaseClient = ReturnType<typeof createSupabaseServerInstance>;
  */
 export const supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
+const supabaseServiceRoleKey =
+  import.meta.env?.SUPABASE_SERVICE_ROLE_KEY ??
+  (typeof process !== "undefined" ? process.env?.SUPABASE_SERVICE_ROLE_KEY : undefined) ??
+  "";
+
+/**
+ * Admin client using service role key. Use only on the server (e.g. POST /api/auth/delete-account).
+ * Never expose the service role key to the client.
+ */
+export function createSupabaseAdminClient() {
+  if (!supabaseServiceRoleKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set");
+  }
+  return createClient<Database>(supabaseUrl, supabaseServiceRoleKey, {
+    auth: { persistSession: false },
+  });
+}
+
 /**
  * User ID used by scripts (e.g. seed) when no session exists. Not used by app middleware.
  */

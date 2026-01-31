@@ -2,7 +2,7 @@ import { createSupabaseServerInstance } from "../db/supabase.client";
 import { defineMiddleware } from "astro:middleware";
 
 const PROTECTED_PATHS = ["/generate", "/flashcards", "/session", "/account"];
-const AUTH_ONLY_PATHS = ["/auth/login", "/auth/register", "/auth/forgot-password"];
+const AUTH_ONLY_PATHS = ["/auth/login", "/auth/register", "/auth/forgot-password", "/auth/reset-password"];
 
 const isProtectedPath = (pathname: string): boolean =>
   PROTECTED_PATHS.includes(pathname) ||
