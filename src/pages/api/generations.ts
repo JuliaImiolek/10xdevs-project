@@ -4,7 +4,6 @@
  */
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { DEFAULT_USER_ID } from "../../db/supabase.client";
 import { json } from "../../lib/api-response";
 import {
   createGeneration,
@@ -203,10 +202,16 @@ function queryToOptions(parsed: GenerationsListQuery): ListGenerationsOptions {
 export const GET: APIRoute = async (context) => {
   const { request, locals } = context;
   const supabase = locals.supabase;
+  const userId = locals.userId;
+  if (!userId) {
+    return json(
+      { error: "Unauthorized", message: "Authentication required" },
+      401
+    );
+  }
 
   const url = new URL(request.url);
   const raw = Object.fromEntries(url.searchParams);
-
   const parsed = generationsListQuerySchema.safeParse(raw);
   if (!parsed.success) {
     const details = parsed.error.flatten().fieldErrors;
@@ -217,14 +222,6 @@ export const GET: APIRoute = async (context) => {
         details,
       },
       400
-    );
-  }
-
-  const userId = DEFAULT_USER_ID;
-  if (!userId) {
-    return json(
-      { error: "Unauthorized", message: "Authentication required" },
-      401
     );
   }
 
@@ -244,12 +241,11 @@ export const GET: APIRoute = async (context) => {
 export const POST: APIRoute = async (context) => {
   const { request, locals } = context;
   const supabase = locals.supabase;
-
-  if (!supabase) {
-    console.error("[POST /api/generations] supabase client missing on locals");
+  const userId = locals.userId;
+  if (!userId) {
     return json(
-      { error: "Internal Server Error", message: "Server configuration error" },
-      500
+      { error: "Unauthorized", message: "Authentication required" },
+      401
     );
   }
 
@@ -277,7 +273,7 @@ export const POST: APIRoute = async (context) => {
 
   let result: Awaited<ReturnType<typeof createGeneration>>;
   try {
-    result = await createGeneration(supabase, DEFAULT_USER_ID, parsed.data);
+    result = await createGeneration(supabase, userId, parsed.data);
   } catch (err) {
     const rawMessage =
       err instanceof Error ? err.message : "Unexpected error during generation";

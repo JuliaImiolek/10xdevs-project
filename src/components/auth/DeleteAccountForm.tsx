@@ -48,7 +48,7 @@ function DeleteAccountForm() {
           if (res.redirected) {
             window.location.href = res.url;
           } else {
-            window.location.href = "/login?message=Konto+zostało+usunięte";
+            window.location.href = "/auth/login?message=Konto+zostało+usunięte";
           }
           return;
         }

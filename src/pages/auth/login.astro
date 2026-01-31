@@ -1,6 +1,6 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import LoginForm from "../components/auth/LoginForm";
+import Layout from "../../layouts/Layout.astro";
+import LoginForm from "../../components/auth/LoginForm";
 const redirectUrl = Astro.url.searchParams.get("redirectTo") ?? undefined;
 const successMessage = Astro.url.searchParams.get("message") ?? undefined;
 ---

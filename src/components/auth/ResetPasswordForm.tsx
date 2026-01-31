@@ -69,7 +69,7 @@ function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           setPasswordError(null);
           setConfirmError(null);
           setTimeout(() => {
-            window.location.href = "/login";
+            window.location.href = "/auth/login";
           }, 2000);
           return;
         }
@@ -192,7 +192,7 @@ function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       </Card>
 
       <p className="text-sm text-muted-foreground">
-        <a href="/login" className="text-primary underline underline-offset-4 hover:no-underline">
+        <a href="/auth/login" className="text-primary underline underline-offset-4 hover:no-underline">
           Wróć do logowania
         </a>
       </p>

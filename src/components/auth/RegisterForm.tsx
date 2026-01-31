@@ -194,7 +194,7 @@ function RegisterForm() {
 
       <p className="text-sm text-muted-foreground">
         Masz już konto?{" "}
-        <a href="/login" className="text-primary underline underline-offset-4 hover:no-underline">
+        <a href="/auth/login" className="text-primary underline underline-offset-4 hover:no-underline">
           Zaloguj się
         </a>
       </p>

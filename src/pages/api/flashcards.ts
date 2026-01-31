@@ -5,7 +5,6 @@
  */
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { DEFAULT_USER_ID } from "../../db/supabase.client";
 import { json } from "../../lib/api-response";
 import {
   createFlashcards,
@@ -123,6 +122,7 @@ function queryToOptions(parsed: FlashcardsListQuery): ListFlashcardsOptions {
 export const POST: APIRoute = async (context) => {
   const { request, locals } = context;
   const supabase = locals.supabase;
+  const userId = locals.userId;
 
   let body: unknown;
   try {
@@ -148,7 +148,6 @@ export const POST: APIRoute = async (context) => {
     );
   }
 
-  const userId = DEFAULT_USER_ID;
   if (!userId) {
     return json(
       { error: "Unauthorized", message: "Authentication required" },
@@ -193,7 +192,7 @@ export const GET: APIRoute = async (context) => {
     );
   }
 
-  const userId = DEFAULT_USER_ID;
+  const userId = locals.userId;
   if (!userId) {
     return json(
       { error: "Unauthorized", message: "Authentication required" },

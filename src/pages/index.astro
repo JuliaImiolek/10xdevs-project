@@ -1,10 +1,57 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import FlashcardGenerationView from "../components/generate/FlashcardGenerationView";
+const user = Astro.locals.user;
+const userId = Astro.locals.userId;
 ---
 
-<Layout>
-  <main class="container mx-auto max-w-4xl px-4 py-8" role="main" aria-label="Generowanie fiszek">
-    <FlashcardGenerationView client:load />
+<Layout title="10x-cards — Fiszki z AI">
+  <main
+    class="container mx-auto max-w-2xl px-4 py-16 text-center"
+    role="main"
+    aria-label="Strona główna"
+  >
+    <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+      10x-cards
+    </h1>
+    <p class="mt-4 text-lg text-muted-foreground">
+      Twórz fiszki edukacyjne przy użyciu sztucznej inteligencji i ucz się efektywniej
+      z metodą spaced repetition.
+    </p>
+    {userId ? (
+      <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+        <a
+          href="/generate"
+          class="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
+        >
+          Generuj fiszki
+        </a>
+        <a
+          href="/flashcards"
+          class="inline-flex items-center justify-center rounded-md border border-input bg-background px-6 py-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+        >
+          Moje fiszki
+        </a>
+        {user?.email && (
+          <p class="w-full text-sm text-muted-foreground">
+            Zalogowano jako {user.email}
+          </p>
+        )}
+      </div>
+    ) : (
+      <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+        <a
+          href="/auth/login"
+          class="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
+        >
+          Zaloguj się
+        </a>
+        <a
+          href="/auth/register"
+          class="inline-flex items-center justify-center rounded-md border border-input bg-background px-6 py-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+        >
+          Zarejestruj się
+        </a>
+      </div>
+    )}
   </main>
 </Layout>

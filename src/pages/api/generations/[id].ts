@@ -4,7 +4,6 @@
  */
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { DEFAULT_USER_ID } from "../../../db/supabase.client";
 import { json } from "../../../lib/api-response";
 import { getGenerationById } from "../../../lib/services/generation.service";
 
@@ -38,7 +37,7 @@ export const GET: APIRoute = async (context) => {
     );
   }
 
-  const userId = DEFAULT_USER_ID;
+  const userId = locals.userId;
   if (!userId) {
     return json(
       { error: "Unauthorized", message: "Authentication required" },

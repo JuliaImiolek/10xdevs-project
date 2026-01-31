@@ -91,7 +91,7 @@ export default function SessionView() {
           <p>{error}</p>
           {isUnauthorized && (
             <p className="mt-2">
-              <a href="/login" className="underline hover:no-underline">
+              <a href="/auth/login" className="underline hover:no-underline">
                 Zaloguj się
               </a>
             </p>

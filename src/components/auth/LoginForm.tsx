@@ -129,7 +129,7 @@ function LoginForm({ redirectTo, successMessage: initialSuccessMessage }: LoginF
               <div className="flex items-center justify-between gap-2">
                 <Label htmlFor={passwordId}>Hasło</Label>
                 <a
-                  href="/forgot-password"
+                  href="/auth/forgot-password"
                   className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
                 >
                   Zapomniałeś hasła?
@@ -170,7 +170,7 @@ function LoginForm({ redirectTo, successMessage: initialSuccessMessage }: LoginF
 
       <p className="text-sm text-muted-foreground">
         Nie masz konta?{" "}
-        <a href="/register" className="text-primary underline underline-offset-4 hover:no-underline">
+        <a href="/auth/register" className="text-primary underline underline-offset-4 hover:no-underline">
           Zarejestruj się
         </a>
       </p>

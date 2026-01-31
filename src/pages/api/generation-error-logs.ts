@@ -162,7 +162,7 @@ export const GET: APIRoute = async (context) => {
     );
   }
 
-  const userId = DEFAULT_USER_ID;
+  const userId = locals.userId;
   if (!userId) {
     return json(
       { error: "Unauthorized", message: "Authentication required" },

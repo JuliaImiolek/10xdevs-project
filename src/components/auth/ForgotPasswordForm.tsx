@@ -128,7 +128,7 @@ function ForgotPasswordForm() {
       </Card>
 
       <p className="text-sm text-muted-foreground">
-        <a href="/login" className="text-primary underline underline-offset-4 hover:no-underline">
+        <a href="/auth/login" className="text-primary underline underline-offset-4 hover:no-underline">
           Wróć do logowania
         </a>
       </p>
