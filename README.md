@@ -9,6 +9,12 @@ A modern, opinionated starter template for building fast, accessible, and AI-fri
 - [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
 - [Tailwind CSS](https://tailwindcss.com/) v4.0.17 - Utility-first CSS framework
 
+### Testing
+
+- **Unit tests**: [Vitest](https://vitest.dev/) — testy jednostkowe TypeScript/React (integracja z Vite/Astro, ESM, szybkie uruchomienie). [React Testing Library](https://testing-library.com/react) — testy komponentów React (zachowanie i dostępność). Opcjonalnie [MSW](https://msw.io/) (Mock Service Worker) lub `vi.fn()`/`vi.mock` do mockowania HTTP/API i `fetch`.
+- **E2E tests**: [Playwright](https://playwright.dev/) — testy end-to-end w przeglądarce (wiele przeglądarek, trwałe sesje, cookies; dopasowanie do Astro SSR).
+- **Coverage**: Vitest `--coverage` (v8/istanbul) dla raportu pokrycia (`src/lib`, `src/components`, `src/pages/api`).
+
 ## Prerequisites
 
 - Node.js v22.14.0 (as specified in `.nvmrc`)
@@ -59,6 +65,17 @@ After that, `DEFAULT_USER_ID` (from `.env` or fallback in code) will exist in `a
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues
 - `npm run seed:user` - Seed default user in Supabase auth (required once for generations and flashcards; needs `SUPABASE_SERVICE_ROLE_KEY` in `.env`)
+- `npm run test` - Run unit tests (Vitest) once
+- `npm run test:watch` - Run unit tests in watch mode
+- `npm run test:ui` - Run Vitest UI (visual test runner)
+- `npm run test:coverage` - Run unit tests with coverage report
+- `npm run test:e2e` - Run E2E tests (Playwright, Chromium)
+- `npm run test:e2e:ui` - Run E2E tests with Playwright UI
+
+### Testing setup
+
+- **Unit (Vitest)**: `npm run test`. Tests live in `src/**/*.test.{ts,tsx}` and `src/**/*.spec.{ts,tsx}`. Setup: `vitest.setup.ts`; config: `vitest.config.ts` (jsdom, React Testing Library).
+- **E2E (Playwright)**: First time run `npx playwright install chromium`. Before E2E run `npm run build` (Playwright starts `preview` and uses `http://localhost:4321`). Tests and Page Objects: `e2e/`.
 
 ## Project Structure
 

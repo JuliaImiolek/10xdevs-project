@@ -81,8 +81,11 @@ const checks = [
     items: [
       { name: "user_id w zapytaniach (izolacja danych)", ok: () => fileContains(path.join(root, "src/lib/services/flashcard.service.ts"), "user_id") || fileContains(path.join(root, "src/pages/api/flashcards.ts"), "userId") },
       { name: "RLS w Supabase (opcjonalnie)", ok: () => {
-        const migration = path.join(root, "supabase/migrations/20250130120003_disable_rls_policies.sql");
-        return exists("supabase/migrations") && (fileContains(migration, "disable row level security") ? "disabled" : true);
+        const enableMigration = path.join(root, "supabase/migrations/20250131140000_enable_rls_policies.sql");
+        const hasEnable = exists("supabase/migrations") && fs.existsSync(enableMigration) && fileContains(enableMigration, "enable row level security");
+        if (hasEnable) return true;
+        const disableMigration = path.join(root, "supabase/migrations/20250130120003_disable_rls_policies.sql");
+        return fileContains(disableMigration, "disable row level security") ? "disabled" : false;
       } },
     ],
   },
