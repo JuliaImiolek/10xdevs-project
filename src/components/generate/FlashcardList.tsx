@@ -13,12 +13,7 @@ interface FlashcardListProps {
 /**
  * Renders the list of generated flashcards; forwards actions and updates to parent.
  */
-function FlashcardList({
-  flashcards,
-  onAction,
-  onUpdate,
-  className,
-}: FlashcardListProps) {
+function FlashcardList({ flashcards, onAction, onUpdate, className }: FlashcardListProps) {
   const handleAction = React.useCallback(
     (id: string) => (action: FlashcardItemAction) => {
       onAction(id, action);
@@ -29,10 +24,7 @@ function FlashcardList({
   if (flashcards.length === 0) return null;
 
   return (
-    <section
-      className={cn("space-y-4", className)}
-      aria-label="Lista propozycji fiszek"
-    >
+    <section className={cn("space-y-4", className)} aria-label="Lista propozycji fiszek">
       <h2 className="text-lg font-semibold">Propozycje fiszek</h2>
       <ul className="list-none space-y-4 p-0">
         {flashcards.map((fc) => (

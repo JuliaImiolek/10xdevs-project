@@ -3,9 +3,7 @@ import { render, screen, within, fireEvent } from "@testing-library/react";
 import { BulkSaveButton } from "./BulkSaveButton";
 import type { FlashcardViewModel } from "@/types";
 
-function makeFlashcard(
-  overrides: Partial<FlashcardViewModel> & { id: string }
-): FlashcardViewModel {
+function makeFlashcard(overrides: Partial<FlashcardViewModel> & { id: string }): FlashcardViewModel {
   return {
     id: overrides.id,
     front: "F",
@@ -21,9 +19,7 @@ describe("BulkSaveButton", () => {
   describe("reguła: odrzucone nigdy nie trafiają do API", () => {
     it("zwraca null gdy lista fiszek pusta", () => {
       const onSave = vi.fn();
-      const { container } = render(
-        <BulkSaveButton flashcards={[]} onSave={onSave} />
-      );
+      const { container } = render(<BulkSaveButton flashcards={[]} onSave={onSave} />);
       expect(container.firstChild).toBeNull();
     });
 
@@ -43,12 +39,12 @@ describe("BulkSaveButton", () => {
       fireEvent.click(acceptedBtn);
 
       expect(onSave).toHaveBeenCalledTimes(1);
-      const payload = onSave.mock.calls[0][0] as Array<{
+      const payload = onSave.mock.calls[0][0] as {
         front: string;
         back: string;
         source: string;
         generation_id: number | null;
-      }>;
+      }[];
       expect(payload).toHaveLength(2);
       expect(payload.map((p) => p.source)).toEqual(["ai-full", "ai-edited"]);
     });
@@ -110,23 +106,15 @@ describe("BulkSaveButton", () => {
       ];
       render(<BulkSaveButton flashcards={list} onSave={vi.fn()} />);
 
-      expect(
-        screen.getByRole("button", { name: /zapisz tylko zaakceptowane/i })
-      ).toBeDisabled();
-      expect(
-        screen.getByRole("button", { name: /zapisz wszystkie fiszki/i })
-      ).toBeEnabled();
+      expect(screen.getByRole("button", { name: /zapisz tylko zaakceptowane/i })).toBeDisabled();
+      expect(screen.getByRole("button", { name: /zapisz wszystkie fiszki/i })).toBeEnabled();
     });
 
     it("'Zapisz wszystkie' jest disabled gdy wszystkie odrzucone", () => {
-      const list: FlashcardViewModel[] = [
-        makeFlashcard({ id: "1", status: "rejected" }),
-      ];
+      const list: FlashcardViewModel[] = [makeFlashcard({ id: "1", status: "rejected" })];
       render(<BulkSaveButton flashcards={list} onSave={vi.fn()} />);
 
-      expect(
-        screen.getByRole("button", { name: /zapisz wszystkie fiszki/i })
-      ).toBeDisabled();
+      expect(screen.getByRole("button", { name: /zapisz wszystkie fiszki/i })).toBeDisabled();
     });
 
     it("wyświetla liczbę w przyciskach", () => {

@@ -2,13 +2,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorNotification } from "@/components/generate/ErrorNotification";
 import { validateEmail, validatePassword } from "@/lib/validations/auth";
 
@@ -62,8 +56,7 @@ function LoginForm({ redirectTo, successMessage: initialSuccessMessage }: LoginF
         }
 
         const data = await res.json().catch(() => ({}));
-        const message =
-          data?.message ?? data?.error ?? "Nieprawidłowy adres e-mail lub hasło. Spróbuj ponownie.";
+        const message = data?.message ?? data?.error ?? "Nieprawidłowy adres e-mail lub hasło. Spróbuj ponownie.";
         setFormError(message);
       } catch {
         setFormError("Wystąpił błąd połączenia. Sprawdź połączenie i spróbuj ponownie.");
@@ -80,9 +73,7 @@ function LoginForm({ redirectTo, successMessage: initialSuccessMessage }: LoginF
         <h1 className="text-2xl font-bold" id="login-heading">
           Logowanie
         </h1>
-        <p className="text-muted-foreground">
-          Zaloguj się, aby korzystać z generowania fiszek i sesji nauki.
-        </p>
+        <p className="text-muted-foreground">Zaloguj się, aby korzystać z generowania fiszek i sesji nauki.</p>
       </header>
 
       <Card>

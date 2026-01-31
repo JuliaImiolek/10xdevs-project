@@ -11,10 +11,7 @@ import { recordReview } from "../../../../lib/services/flashcard.service";
 export const prerender = false;
 
 const flashcardIdParamSchema = z.object({
-  id: z.coerce
-    .number()
-    .int("Flashcard id must be an integer")
-    .positive("Flashcard id must be a positive number"),
+  id: z.coerce.number().int("Flashcard id must be an integer").positive("Flashcard id must be a positive number"),
 });
 
 const reviewBodySchema = z.object({
@@ -30,28 +27,19 @@ export const POST: APIRoute = async (context) => {
 
   const parsedParams = flashcardIdParamSchema.safeParse(params);
   if (!parsedParams.success) {
-    return json(
-      { error: "Bad Request", message: "Invalid flashcard id" },
-      400
-    );
+    return json({ error: "Bad Request", message: "Invalid flashcard id" }, 400);
   }
 
   const userId = locals.userId;
   if (!userId) {
-    return json(
-      { error: "Unauthorized", message: "Authentication required" },
-      401
-    );
+    return json({ error: "Unauthorized", message: "Authentication required" }, 401);
   }
 
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return json(
-      { error: "Bad Request", message: "Invalid JSON body" },
-      400
-    );
+    return json({ error: "Bad Request", message: "Invalid JSON body" }, 400);
   }
 
   const parsedBody = reviewBodySchema.safeParse(body);
@@ -65,17 +53,11 @@ export const POST: APIRoute = async (context) => {
   const result = await recordReview(supabase, userId, parsedParams.data.id, grade);
 
   if (!result.success) {
-    return json(
-      { error: "Internal Server Error", message: result.errorMessage },
-      500
-    );
+    return json({ error: "Internal Server Error", message: result.errorMessage }, 500);
   }
 
   if (result.notFound) {
-    return json(
-      { error: "Not Found", message: "Flashcard not found" },
-      404
-    );
+    return json({ error: "Not Found", message: "Flashcard not found" }, 404);
   }
 
   return json({ ok: true }, 200);

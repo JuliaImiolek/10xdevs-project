@@ -12,12 +12,7 @@ export default getViteConfig({
       provider: "v8",
       reporter: ["text", "json", "html"],
       include: ["src/lib/**", "src/components/**", "src/pages/api/**"],
-      exclude: [
-        "src/**/*.test.{ts,tsx}",
-        "src/**/*.spec.{ts,tsx}",
-        "src/**/*.d.ts",
-        "src/**/index.ts",
-      ],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/**/*.spec.{ts,tsx}", "src/**/*.d.ts", "src/**/index.ts"],
     },
   },
 });

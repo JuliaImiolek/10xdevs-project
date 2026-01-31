@@ -2,10 +2,7 @@ import * as React from "react";
 import type { FlashcardViewModel, FlashcardCreateDto } from "@/types";
 import type { FlashcardItemAction } from "@/components/generate/FlashcardListItem";
 import { createFlashcards } from "@/lib/flashcards-api";
-import {
-  TEXT_INPUT_MIN_LENGTH,
-  TEXT_INPUT_MAX_LENGTH,
-} from "@/components/generate/TextInputArea";
+import { TEXT_INPUT_MIN_LENGTH, TEXT_INPUT_MAX_LENGTH } from "@/components/generate/TextInputArea";
 
 export interface UseFlashcardGenerationResult {
   text: string;
@@ -36,7 +33,7 @@ function useFlashcardGeneration(): UseFlashcardGenerationResult {
   const [flashcards, setFlashcards] = React.useState<FlashcardViewModel[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [apiError, setApiError] = React.useState<string | null>(null);
-  const [generationId, setGenerationId] = React.useState<number | null>(null);
+  const [, setGenerationId] = React.useState<number | null>(null);
 
   const validateText = React.useCallback((): boolean => {
     const len = text.length;
@@ -45,15 +42,11 @@ function useFlashcardGeneration(): UseFlashcardGenerationResult {
       return false;
     }
     if (len < TEXT_INPUT_MIN_LENGTH) {
-      setTextError(
-        `Tekst musi mieć co najmniej ${TEXT_INPUT_MIN_LENGTH} znaków (aktualnie: ${len}).`
-      );
+      setTextError(`Tekst musi mieć co najmniej ${TEXT_INPUT_MIN_LENGTH} znaków (aktualnie: ${len}).`);
       return false;
     }
     if (len > TEXT_INPUT_MAX_LENGTH) {
-      setTextError(
-        `Tekst może mieć co najwyżej ${TEXT_INPUT_MAX_LENGTH} znaków (aktualnie: ${len}).`
-      );
+      setTextError(`Tekst może mieć co najwyżej ${TEXT_INPUT_MAX_LENGTH} znaków (aktualnie: ${len}).`);
       return false;
     }
     setTextError(null);
@@ -82,26 +75,21 @@ function useFlashcardGeneration(): UseFlashcardGenerationResult {
         }
         setGenerationId(data.generation_id ?? null);
         const proposals = data.flashcards_proposals ?? [];
-        const viewModels: FlashcardViewModel[] = proposals.map(
-          (p: { front: string; back: string }, index: number) => ({
-            id: `gen-${data.generation_id}-${index}`,
-            front: p.front,
-            back: p.back,
-            source: "ai-full",
-            generation_id: data.generation_id ?? null,
-            status: "pending" as const,
-          })
-        );
+        const viewModels: FlashcardViewModel[] = proposals.map((p: { front: string; back: string }, index: number) => ({
+          id: `gen-${data.generation_id}-${index}`,
+          front: p.front,
+          back: p.back,
+          source: "ai-full",
+          generation_id: data.generation_id ?? null,
+          status: "pending" as const,
+        }));
         setFlashcards(viewModels);
       })
       .catch((err) => {
-        const message =
-          err instanceof Error ? err.message : "Wystąpił błąd.";
+        const message = err instanceof Error ? err.message : "Wystąpił błąd.";
         // Network/connection errors (e.g. dev server not running, wrong origin)
         const isNetworkError =
-          message === "fetch failed" ||
-          message.includes("Failed to fetch") ||
-          message.includes("NetworkError");
+          message === "fetch failed" || message.includes("Failed to fetch") || message.includes("NetworkError");
         setApiError(
           isNetworkError
             ? "Nie można połączyć z serwerem. Upewnij się, że aplikacja jest uruchomiona (npm run dev) i otwarta pod tym samym adresem."
@@ -113,56 +101,40 @@ function useFlashcardGeneration(): UseFlashcardGenerationResult {
       });
   }, [text, validateText]);
 
-  const handleListAction = React.useCallback(
-    (id: string, action: FlashcardItemAction) => {
-      setFlashcards((prev) =>
-        prev.map((f) => {
-          if (f.id !== id) return f;
-          switch (action) {
-            case "accept":
-              return { ...f, status: "accepted" as const };
-            case "reject":
-              return { ...f, status: "rejected" as const };
-            case "edit":
-              return { ...f, status: "edited" as const };
-            default:
-              return f;
-          }
-        })
-      );
-    },
-    []
-  );
+  const handleListAction = React.useCallback((id: string, action: FlashcardItemAction) => {
+    setFlashcards((prev) =>
+      prev.map((f) => {
+        if (f.id !== id) return f;
+        switch (action) {
+          case "accept":
+            return { ...f, status: "accepted" as const };
+          case "reject":
+            return { ...f, status: "rejected" as const };
+          case "edit":
+            return { ...f, status: "edited" as const };
+          default:
+            return f;
+        }
+      })
+    );
+  }, []);
 
-  const handleFlashcardUpdate = React.useCallback(
-    (id: string, front: string, back: string) => {
-      setFlashcards((prev) =>
-        prev.map((f) =>
-          f.id === id ? { ...f, front, back, status: "edited" as const } : f
-        )
-      );
-    },
-    []
-  );
+  const handleFlashcardUpdate = React.useCallback((id: string, front: string, back: string) => {
+    setFlashcards((prev) => prev.map((f) => (f.id === id ? { ...f, front, back, status: "edited" as const } : f)));
+  }, []);
 
-  const handleSave = React.useCallback(
-    async (toSave: FlashcardCreateDto[]) => {
-      if (toSave.length === 0) return;
-      setApiError(null);
-      const result = await createFlashcards(toSave);
-      if (result.ok) {
-        setFlashcards([]);
-        setGenerationId(null);
-        return;
-      }
-      const msg =
-        result.error.message ??
-        result.error.error ??
-        "Błąd zapisu fiszek.";
-      setApiError(msg);
-    },
-    []
-  );
+  const handleSave = React.useCallback(async (toSave: FlashcardCreateDto[]) => {
+    if (toSave.length === 0) return;
+    setApiError(null);
+    const result = await createFlashcards(toSave);
+    if (result.ok) {
+      setFlashcards([]);
+      setGenerationId(null);
+      return;
+    }
+    const msg = result.error.message ?? result.error.error ?? "Błąd zapisu fiszek.";
+    setApiError(msg);
+  }, []);
 
   const displayError = apiError ?? textError ?? null;
 

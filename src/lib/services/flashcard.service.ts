@@ -5,27 +5,11 @@
  */
 import type { SupabaseClient } from "../../db/supabase.client";
 import type { FlashcardInsert } from "../../types";
-import type {
-  FlashcardDto,
-  FlashcardsCreateCommand,
-  FlashcardsListResponseDto,
-} from "../../types";
+import type { FlashcardDto, FlashcardsCreateCommand, FlashcardsListResponseDto } from "../../types";
 import type { Database } from "../../db/database.types";
-import {
-  scheduleReview,
-  nextReviewAtFromInterval,
-  type SessionGradeUi,
-} from "../srs";
+import { scheduleReview, nextReviewAtFromInterval, type SessionGradeUi } from "../srs";
 
 type FlashcardRow = Database["public"]["Tables"]["flashcards"]["Row"];
-
-/** Row shape including SRS columns (DB has them after migration; types may lag). */
-type FlashcardRowWithSrs = FlashcardRow & {
-  next_review_at?: string | null;
-  interval_days?: number;
-  repetitions?: number;
-  ease_factor?: number;
-};
 
 // ------------------------------------------------------------------------------------------------
 // List & get by id — types and sort mapping (GET /flashcards, GET /flashcards/{id})
@@ -65,11 +49,11 @@ export type GetFlashcardByIdResult =
   | { success: false; errorMessage: string };
 
 /** Payload for PUT /flashcards/{id}: only front, back, and source (ai-edited | manual). */
-export type UpdateFlashcardPayload = {
+export interface UpdateFlashcardPayload {
   front?: string;
   back?: string;
   source?: "ai-edited" | "manual";
-};
+}
 
 /** Result of updateFlashcard: updated flashcard DTO, null (not found), or server error. */
 export type UpdateFlashcardResult =
@@ -130,13 +114,8 @@ function rowToFlashcardDto(row: FlashcardRow): FlashcardDto {
  * Maps API sort value to Supabase column and direction for flashcards table.
  * Used by listFlashcards for .order(column, { ascending }).
  */
-function mapSortToOrder(
-  sort: ListFlashcardsSort
-): { column: keyof FlashcardRow; ascending: boolean } {
-  const map: Record<
-    ListFlashcardsSort,
-    { column: keyof FlashcardRow; ascending: boolean }
-  > = {
+function mapSortToOrder(sort: ListFlashcardsSort): { column: keyof FlashcardRow; ascending: boolean } {
+  const map: Record<ListFlashcardsSort, { column: keyof FlashcardRow; ascending: boolean }> = {
     created_at: { column: "created_at", ascending: true },
     created_at_desc: { column: "created_at", ascending: false },
     updated_at: { column: "updated_at", ascending: true },
@@ -173,10 +152,7 @@ export async function createFlashcards(
     user_id: userId,
   }));
 
-  const { data: insertedRows, error } = await supabase
-    .from("flashcards")
-    .insert(rows)
-    .select();
+  const { data: insertedRows, error } = await supabase.from("flashcards").insert(rows).select();
 
   if (error) {
     console.error("[FlashcardService] insert error:", error.message);
@@ -209,10 +185,7 @@ export async function listFlashcards(
   const to = page * limit - 1;
   const { column, ascending } = mapSortToOrder(sort);
 
-  let query = supabase
-    .from("flashcards")
-    .select("*", { count: "exact", head: false })
-    .eq("user_id", userId);
+  let query = supabase.from("flashcards").select("*", { count: "exact", head: false }).eq("user_id", userId);
 
   if (filter?.source) {
     query = query.eq("source", SOURCE_TO_DB[filter.source]);

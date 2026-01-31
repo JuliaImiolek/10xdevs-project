@@ -5,8 +5,7 @@
  */
 import { createClient } from "@supabase/supabase-js";
 
-const DEFAULT_USER_ID =
-  process.env.DEFAULT_USER_ID ?? "43454c13-032d-4a61-8f7c-356fab613472";
+const DEFAULT_USER_ID = process.env.DEFAULT_USER_ID ?? "43454c13-032d-4a61-8f7c-356fab613472";
 const DEV_EMAIL = "dev-default@localhost";
 const DEV_PASSWORD = "dev-default-password";
 

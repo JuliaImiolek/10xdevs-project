@@ -1,7 +1,6 @@
 import * as React from "react";
 import type { PaginationDto } from "@/types";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 export interface PaginationProps {
   pagination: PaginationDto;
@@ -14,11 +13,7 @@ function getMaxPage(total: number, limit: number): number {
   return Math.max(1, Math.ceil(total / limit));
 }
 
-export function Pagination({
-  pagination,
-  onPageChange,
-  disabled = false,
-}: PaginationProps) {
+export function Pagination({ pagination, onPageChange, disabled = false }: PaginationProps) {
   const { page, limit, total } = pagination;
   const maxPage = getMaxPage(total, limit);
   const canPrev = page > 1;
@@ -37,10 +32,7 @@ export function Pagination({
   }, [canNext, page, maxPage, onPageChange]);
 
   return (
-    <nav
-      className="flex items-center justify-between gap-4 border-t pt-4"
-      aria-label="Nawigacja stron"
-    >
+    <nav className="flex items-center justify-between gap-4 border-t pt-4" aria-label="Nawigacja stron">
       <p className="text-sm text-muted-foreground" aria-live="polite">
         Strona {page} z {maxPage}
       </p>

@@ -41,19 +41,14 @@ describe("flashcards-api", () => {
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
       const [url, options] = mockFetch.mock.calls[0];
-      expect(url).toBe(
-        "/api/flashcards?page=2&limit=10&sort=updated_at_desc"
-      );
+      expect(url).toBe("/api/flashcards?page=2&limit=10&sort=updated_at_desc");
       expect(options).toMatchObject({ method: "GET", credentials: "include" });
     });
 
     it("dodaje parametr source do URL gdy podany", async () => {
       const mockFetch = vi.mocked(fetch);
       mockFetch.mockResolvedValue(
-        new Response(
-          JSON.stringify({ data: [], pagination: { page: 1, limit: 20, total: 0 } }),
-          { status: 200 }
-        )
+        new Response(JSON.stringify({ data: [], pagination: { page: 1, limit: 20, total: 0 } }), { status: 200 })
       );
 
       await fetchFlashcardsList({
@@ -72,10 +67,7 @@ describe("flashcards-api", () => {
     it("dodaje forSession=true do URL gdy podany", async () => {
       const mockFetch = vi.mocked(fetch);
       mockFetch.mockResolvedValue(
-        new Response(
-          JSON.stringify({ data: [], pagination: { page: 1, limit: 20, total: 0 } }),
-          { status: 200 }
-        )
+        new Response(JSON.stringify({ data: [], pagination: { page: 1, limit: 20, total: 0 } }), { status: 200 })
       );
 
       await fetchFlashcardsList({
@@ -95,9 +87,7 @@ describe("flashcards-api", () => {
       const mockFetch = vi.mocked(fetch);
       const data = [{ id: 1, front: "F", back: "B", source: "manual" } as FlashcardDto];
       const pagination = { page: 1, limit: 20, total: 1 };
-      mockFetch.mockResolvedValue(
-        new Response(JSON.stringify({ data, pagination }), { status: 200 })
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify({ data, pagination }), { status: 200 }));
 
       const result = await fetchFlashcardsList({
         page: 1,
@@ -106,19 +96,12 @@ describe("flashcards-api", () => {
       });
 
       expect(result).toEqual({ ok: true, data: { data, pagination } });
-      expectTypeOf(result).toMatchTypeOf<
-        { ok: true; data: { data: typeof data; pagination: typeof pagination } }
-      >();
+      expectTypeOf(result).toMatchTypeOf<{ ok: true; data: { data: typeof data; pagination: typeof pagination } }>();
     });
 
     it("zwraca ok: false i error gdy status 401", async () => {
       const mockFetch = vi.mocked(fetch);
-      mockFetch.mockResolvedValue(
-        new Response(
-          JSON.stringify({ message: "Unauthorized" }),
-          { status: 401 }
-        )
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 }));
 
       const result = await fetchFlashcardsList({
         page: 1,
@@ -200,13 +183,9 @@ describe("flashcards-api", () => {
           updated_at: "",
         },
       ];
-      mockFetch.mockResolvedValue(
-        new Response(JSON.stringify({ flashcards: created }), { status: 200 })
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify({ flashcards: created }), { status: 200 }));
 
-      const payload: FlashcardCreateDto[] = [
-        { front: "Q", back: "A", source: "manual", generation_id: null },
-      ];
+      const payload: FlashcardCreateDto[] = [{ front: "Q", back: "A", source: "manual", generation_id: null }];
       const result = await createFlashcards(payload);
 
       expect(mockFetch).toHaveBeenCalledWith(
@@ -222,13 +201,9 @@ describe("flashcards-api", () => {
 
     it("zwraca ok: false i error przy 4xx", async () => {
       const mockFetch = vi.mocked(fetch);
-      mockFetch.mockResolvedValue(
-        new Response(JSON.stringify({ message: "Invalid source" }), { status: 400 })
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify({ message: "Invalid source" }), { status: 400 }));
 
-      const result = await createFlashcards([
-        { front: "Q", back: "A", source: "manual", generation_id: null },
-      ]);
+      const result = await createFlashcards([{ front: "Q", back: "A", source: "manual", generation_id: null }]);
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
@@ -250,9 +225,7 @@ describe("flashcards-api", () => {
         created_at: "",
         updated_at: "",
       };
-      mockFetch.mockResolvedValue(
-        new Response(JSON.stringify(updated), { status: 200 })
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify(updated), { status: 200 }));
 
       const result = await updateFlashcard(1, {
         front: "Q2",
@@ -302,9 +275,7 @@ describe("flashcards-api", () => {
   describe("deleteFlashcard", () => {
     it("wysyła DELETE i zwraca ok: true z message", async () => {
       const mockFetch = vi.mocked(fetch);
-      mockFetch.mockResolvedValue(
-        new Response(JSON.stringify({ message: "Deleted" }), { status: 200 })
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify({ message: "Deleted" }), { status: 200 }));
 
       const result = await deleteFlashcard(5);
 
@@ -329,9 +300,7 @@ describe("flashcards-api", () => {
 
     it("zwraca ok: false przy 404", async () => {
       const mockFetch = vi.mocked(fetch);
-      mockFetch.mockResolvedValue(
-        new Response(JSON.stringify({ message: "Not found" }), { status: 404 })
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify({ message: "Not found" }), { status: 404 }));
 
       const result = await deleteFlashcard(999);
 
@@ -361,9 +330,7 @@ describe("flashcards-api", () => {
 
     it("zwraca ok: false gdy body.ok === false lub błąd HTTP", async () => {
       const mockFetch = vi.mocked(fetch);
-      mockFetch.mockResolvedValue(
-        new Response(JSON.stringify({ message: "Card not found" }), { status: 404 })
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify({ message: "Card not found" }), { status: 404 }));
 
       const result = await submitReview(1, 3);
 

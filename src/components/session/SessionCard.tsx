@@ -12,17 +12,11 @@ export interface SessionCardProps {
  * Wyświetla jedną fiszkę: przód zawsze widoczny, tył tylko gdy revealed === true.
  * Długie teksty: max-height + overflow-y-auto.
  */
-export const SessionCard = React.memo(function SessionCard({
-  flashcard,
-  revealed,
-}: SessionCardProps) {
+export const SessionCard = React.memo(function SessionCard({ flashcard, revealed }: SessionCardProps) {
   return (
     <Card className="min-h-[8rem]">
       <CardHeader className="pb-2">
-        <p
-          className="text-base font-semibold leading-snug"
-          aria-label="Przód fiszki"
-        >
+        <p className="text-base font-semibold leading-snug" aria-label="Przód fiszki">
           {flashcard.front}
         </p>
       </CardHeader>

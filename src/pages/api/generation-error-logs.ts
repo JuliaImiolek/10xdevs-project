@@ -7,10 +7,7 @@ import type { APIRoute } from "astro";
 import { z } from "zod";
 import { DEFAULT_USER_ID } from "../../db/supabase.client";
 import { json } from "../../lib/api-response";
-import {
-  listGenerationErrorLogs,
-  type ListGenerationErrorLogsOptions,
-} from "../../lib/services/generation.service";
+import { listGenerationErrorLogs, type ListGenerationErrorLogsOptions } from "../../lib/services/generation.service";
 
 export const prerender = false;
 
@@ -38,30 +35,17 @@ export const generationErrorLogsListQuerySchema = z
   .object({
     page: z
       .union([z.string(), z.number(), z.undefined()])
-      .transform((v) =>
-        v === undefined || v === "" ? DEFAULT_PAGE : Number(v)
-      )
+      .transform((v) => (v === undefined || v === "" ? DEFAULT_PAGE : Number(v)))
       .pipe(z.number().int().min(1, "Page must be at least 1")),
     limit: z
       .union([z.string(), z.number(), z.undefined()])
-      .transform((v) =>
-        v === undefined || v === "" ? DEFAULT_LIMIT : Number(v)
-      )
-      .pipe(
-        z
-          .number()
-          .int()
-          .min(1, "Limit must be at least 1")
-          .max(MAX_LIMIT, `Limit must be at most ${MAX_LIMIT}`)
-      ),
+      .transform((v) => (v === undefined || v === "" ? DEFAULT_LIMIT : Number(v)))
+      .pipe(z.number().int().min(1, "Limit must be at least 1").max(MAX_LIMIT, `Limit must be at most ${MAX_LIMIT}`)),
     sort: z
       .string()
       .optional()
       .default("created_at_desc")
-      .refine(
-        (v) => generationErrorLogsListSortEnum.safeParse(v).success,
-        "Invalid sort value"
-      )
+      .refine((v) => generationErrorLogsListSortEnum.safeParse(v).success, "Invalid sort value")
       .transform((v) => v as z.infer<typeof generationErrorLogsListSortEnum>),
     model: z
       .string()
@@ -104,20 +88,14 @@ export const generationErrorLogsListQuerySchema = z
     }
   });
 
-export type GenerationErrorLogsListQuery = z.infer<
-  typeof generationErrorLogsListQuerySchema
->;
+export type GenerationErrorLogsListQuery = z.infer<typeof generationErrorLogsListQuerySchema>;
 
 /**
  * Maps validated query (flat) to ListGenerationErrorLogsOptions (with nested filter).
  */
-function queryToOptions(
-  parsed: GenerationErrorLogsListQuery
-): ListGenerationErrorLogsOptions {
+function queryToOptions(parsed: GenerationErrorLogsListQuery): ListGenerationErrorLogsOptions {
   const filter =
-    parsed.model != null ||
-    parsed.created_after != null ||
-    parsed.created_before != null
+    parsed.model != null || parsed.created_after != null || parsed.created_before != null
       ? {
           ...(parsed.model != null && { model: parsed.model }),
           ...(parsed.created_after != null && {
@@ -164,10 +142,7 @@ export const GET: APIRoute = async (context) => {
 
   const userId = locals.userId;
   if (!userId) {
-    return json(
-      { error: "Unauthorized", message: "Authentication required" },
-      401
-    );
+    return json({ error: "Unauthorized", message: "Authentication required" }, 401);
   }
 
   // When endpoint is restricted to admins only, non-admin users receive 403.
@@ -177,7 +152,10 @@ export const GET: APIRoute = async (context) => {
   if (adminOnly) {
     const adminIdsRaw = import.meta.env.ADMIN_USER_IDS ?? "";
     const adminIds = adminIdsRaw
-      ? adminIdsRaw.split(",").map((id: string) => id.trim()).filter(Boolean)
+      ? adminIdsRaw
+          .split(",")
+          .map((id: string) => id.trim())
+          .filter(Boolean)
       : [DEFAULT_USER_ID];
     if (!adminIds.includes(userId)) {
       return json(

@@ -24,8 +24,7 @@ export const POST: APIRoute = async ({ request }) => {
   const parsed = resetPasswordBodySchema.safeParse(body);
   if (!parsed.success) {
     const first = parsed.error.flatten().fieldErrors;
-    const message =
-      (first.token?.[0] as string) ?? (first.new_password?.[0] as string) ?? "Błąd walidacji.";
+    const message = (first.token?.[0] as string) ?? (first.new_password?.[0] as string) ?? "Błąd walidacji.";
     return json({ error: "Validation error", message }, 400);
   }
 

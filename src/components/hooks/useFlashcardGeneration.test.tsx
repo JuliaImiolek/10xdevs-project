@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, waitFor, act } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { useFlashcardGeneration } from "./useFlashcardGeneration";
 
 const mockCreateFlashcards = vi.fn();
@@ -144,10 +144,7 @@ describe("useFlashcardGeneration", () => {
 
     it("wywołuje POST /api/generations z source_text gdy tekst prawidłowy", async () => {
       fetchMock.mockResolvedValue(
-        new Response(
-          JSON.stringify({ generation_id: 1, flashcards_proposals: [] }),
-          { status: 200 }
-        )
+        new Response(JSON.stringify({ generation_id: 1, flashcards_proposals: [] }), { status: 200 })
       );
       const { result } = renderHook(() => useFlashcardGeneration());
       const text = makeText(TEXT_MIN);
@@ -169,7 +166,6 @@ describe("useFlashcardGeneration", () => {
         })
       );
     });
-
   });
 
   describe("handleListAction", () => {
@@ -189,11 +185,7 @@ describe("useFlashcardGeneration", () => {
       const { result } = renderHook(() => useFlashcardGeneration());
 
       act(() => {
-        result.current.handleFlashcardUpdate(
-          "nieistniejacy-id",
-          "Front",
-          "Back"
-        );
+        result.current.handleFlashcardUpdate("nieistniejacy-id", "Front", "Back");
       });
 
       expect(result.current.flashcards).toEqual([]);

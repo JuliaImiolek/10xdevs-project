@@ -28,5 +28,5 @@ for (const file of Object.values(cov)) {
   }
 }
 
-const pct = total ? (100 * covered / total).toFixed(1) : "0";
+const pct = total ? ((100 * covered) / total).toFixed(1) : "0";
 console.log(pct);

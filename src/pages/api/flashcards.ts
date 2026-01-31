@@ -26,11 +26,10 @@ const flashcardCreateItemSchema = z
     back: z.string().min(1, "back is required").max(500, "back must be at most 500 characters"),
     source: sourceSchema,
     // Accept 0 and undefined as null (legacy / optional field)
-    generation_id: z
-      .preprocess(
-        (val) => (val === 0 || val === undefined ? null : val),
-        z.union([z.number().int().positive(), z.null()])
-      ),
+    generation_id: z.preprocess(
+      (val) => (val === 0 || val === undefined ? null : val),
+      z.union([z.number().int().positive(), z.null()])
+    ),
   })
   .superRefine((data, ctx) => {
     if (data.source === "manual") {
@@ -49,10 +48,7 @@ export const flashcardsCreateRequestSchema = z.object({
   flashcards: z
     .array(flashcardCreateItemSchema)
     .min(1, "flashcards array must contain at least one item")
-    .max(
-      FLASHCARDS_ARRAY_MAX_LENGTH,
-      `flashcards array must contain at most ${FLASHCARDS_ARRAY_MAX_LENGTH} items`
-    ),
+    .max(FLASHCARDS_ARRAY_MAX_LENGTH, `flashcards array must contain at most ${FLASHCARDS_ARRAY_MAX_LENGTH} items`),
 });
 
 export type FlashcardsCreateRequest = z.infer<typeof flashcardsCreateRequestSchema>;
@@ -81,21 +77,12 @@ export const flashcardsListQuerySchema = z.object({
   limit: z
     .union([z.string(), z.number(), z.undefined()])
     .transform((v) => (v === undefined || v === "" ? DEFAULT_LIMIT : Number(v)))
-    .pipe(
-      z
-        .number()
-        .int()
-        .min(1, "Limit must be at least 1")
-        .max(MAX_LIMIT, `Limit must be at most ${MAX_LIMIT}`)
-    ),
+    .pipe(z.number().int().min(1, "Limit must be at least 1").max(MAX_LIMIT, `Limit must be at most ${MAX_LIMIT}`)),
   sort: z
     .string()
     .optional()
     .default("created_at_desc")
-    .refine(
-      (v) => flashcardsListSortEnum.safeParse(v).success,
-      "Invalid sort value"
-    )
+    .refine((v) => flashcardsListSortEnum.safeParse(v).success, "Invalid sort value")
     .transform((v) => v as z.infer<typeof flashcardsListSortEnum>),
   source: z
     .string()
@@ -114,8 +101,7 @@ export type FlashcardsListQuery = z.infer<typeof flashcardsListQuerySchema>;
  * Maps validated GET /flashcards query params to ListFlashcardsOptions for the service.
  */
 function queryToOptions(parsed: FlashcardsListQuery): ListFlashcardsOptions {
-  const filter =
-    parsed.source != null ? { source: parsed.source } : undefined;
+  const filter = parsed.source != null ? { source: parsed.source } : undefined;
   return {
     page: parsed.page,
     limit: parsed.limit,
@@ -133,10 +119,7 @@ export const POST: APIRoute = async (context) => {
   try {
     body = await request.json();
   } catch {
-    return json(
-      { error: "Bad Request", message: "Invalid JSON body" },
-      400
-    );
+    return json({ error: "Bad Request", message: "Invalid JSON body" }, 400);
   }
 
   const parsed = flashcardsCreateRequestSchema.safeParse(body);
@@ -154,10 +137,7 @@ export const POST: APIRoute = async (context) => {
   }
 
   if (!userId) {
-    return json(
-      { error: "Unauthorized", message: "Authentication required" },
-      401
-    );
+    return json({ error: "Unauthorized", message: "Authentication required" }, 401);
   }
 
   const result = await createFlashcards(supabase, userId, parsed.data);
@@ -166,10 +146,7 @@ export const POST: APIRoute = async (context) => {
     return json({ flashcards: result.data.flashcards }, 201);
   }
 
-  return json(
-    { error: "Internal Server Error", message: result.errorMessage },
-    500
-  );
+  return json({ error: "Internal Server Error", message: result.errorMessage }, 500);
 };
 
 /**
@@ -199,20 +176,14 @@ export const GET: APIRoute = async (context) => {
 
   const userId = locals.userId;
   if (!userId) {
-    return json(
-      { error: "Unauthorized", message: "Authentication required" },
-      401
-    );
+    return json({ error: "Unauthorized", message: "Authentication required" }, 401);
   }
 
   if (parsed.data.forSession) {
     const limit = Math.min(parsed.data.limit, 100);
     const result = await listFlashcardsForSession(supabase, userId, limit);
     if (!result.success) {
-      return json(
-        { error: "Internal Server Error", message: result.errorMessage },
-        500
-      );
+      return json({ error: "Internal Server Error", message: result.errorMessage }, 500);
     }
     return json(
       {
@@ -230,8 +201,5 @@ export const GET: APIRoute = async (context) => {
     return json(result.data, 200);
   }
 
-  return json(
-    { error: "Internal Server Error", message: result.errorMessage },
-    500
-  );
+  return json({ error: "Internal Server Error", message: result.errorMessage }, 500);
 };

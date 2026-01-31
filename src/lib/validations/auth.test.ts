@@ -46,9 +46,7 @@ describe("validatePassword", () => {
 
   it("używa fieldName w komunikatach", () => {
     expect(validatePassword("", "Nowe hasło")).toBe("Nowe hasło jest wymagane.");
-    expect(validatePassword("a", "Nowe hasło")).toBe(
-      `Nowe hasło musi mieć co najmniej ${PASSWORD_MIN_LENGTH} znaków.`
-    );
+    expect(validatePassword("a", "Nowe hasło")).toBe(`Nowe hasło musi mieć co najmniej ${PASSWORD_MIN_LENGTH} znaków.`);
   });
 });
 

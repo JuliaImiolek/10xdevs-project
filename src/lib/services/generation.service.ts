@@ -24,7 +24,7 @@ const DEFAULT_MODEL = "openai/gpt-oss-120b:free";
 
 /** Expected JSON shape from LLM: object with "flashcards" array of { front, back }. */
 interface LlmFlashcardsResponse {
-  flashcards?: Array<{ front?: string; back?: string }>;
+  flashcards?: { front?: string; back?: string }[];
 }
 
 /** System prompt for flashcard generation: instructs LLM to return JSON only. */
@@ -56,10 +56,7 @@ type CallOpenRouterResult =
  * Calls OpenRouter LLM to generate flashcard proposals from source text.
  * Returns proposals or error details for logging and API response.
  */
-async function callOpenRouterForFlashcards(
-  sourceText: string,
-  model: string
-): Promise<CallOpenRouterResult> {
+async function callOpenRouterForFlashcards(sourceText: string, model: string): Promise<CallOpenRouterResult> {
   const result = await openRouter.chatWithStructuredOutput<LlmFlashcardsResponse>({
     systemMessage: FLASHCARD_SYSTEM_PROMPT,
     userMessage: sourceText,
@@ -148,13 +145,7 @@ export interface ListGenerationErrorLogsFilter {
 export interface ListGenerationErrorLogsOptions {
   page: number;
   limit: number;
-  sort:
-    | "created_at"
-    | "created_at_desc"
-    | "model"
-    | "model_desc"
-    | "error_code"
-    | "error_code_desc";
+  sort: "created_at" | "created_at_desc" | "model" | "model_desc" | "error_code" | "error_code_desc";
   filter?: ListGenerationErrorLogsFilter;
 }
 
@@ -240,15 +231,13 @@ export async function createGeneration(
 
   // Optionally insert flashcards linked to this generation (ai-full, generation_id set)
   if (proposals.length > 0) {
-    const flashcardsInsert: TablesInsert["flashcards"]["Insert"][] = proposals.map(
-      (p) => ({
-        user_id: userId,
-        front: p.front,
-        back: p.back,
-        source: "ai-full",
-        generation_id: generationId,
-      })
-    );
+    const flashcardsInsert: TablesInsert["flashcards"]["Insert"][] = proposals.map((p) => ({
+      user_id: userId,
+      front: p.front,
+      back: p.back,
+      source: "ai-full",
+      generation_id: generationId,
+    }));
     await supabase.from("flashcards").insert(flashcardsInsert);
   }
 
@@ -264,9 +253,10 @@ export async function createGeneration(
 /**
  * Maps sort query value to Supabase column name and ascending flag.
  */
-function mapSortToOrder(
-  sort: ListGenerationsOptions["sort"]
-): { column: keyof Database["public"]["Tables"]["generations"]["Row"]; ascending: boolean } {
+function mapSortToOrder(sort: ListGenerationsOptions["sort"]): {
+  column: keyof Database["public"]["Tables"]["generations"]["Row"];
+  ascending: boolean;
+} {
   const map: Record<
     ListGenerationsOptions["sort"],
     { column: keyof Database["public"]["Tables"]["generations"]["Row"]; ascending: boolean }
@@ -288,9 +278,10 @@ type GenerationErrorLogRow = Database["public"]["Tables"]["generation_error_logs
 /**
  * Maps sort query value to generation_error_logs column and direction.
  */
-function mapSortToOrderErrorLogs(
-  sort: ListGenerationErrorLogsOptions["sort"]
-): { column: keyof GenerationErrorLogRow; ascending: boolean } {
+function mapSortToOrderErrorLogs(sort: ListGenerationErrorLogsOptions["sort"]): {
+  column: keyof GenerationErrorLogRow;
+  ascending: boolean;
+} {
   const map: Record<
     ListGenerationErrorLogsOptions["sort"],
     { column: keyof GenerationErrorLogRow; ascending: boolean }
@@ -319,10 +310,7 @@ export async function listGenerations(
   const to = page * limit - 1;
   const { column, ascending } = mapSortToOrder(sort);
 
-  let query = supabase
-    .from("generations")
-    .select("*", { count: "exact", head: false })
-    .eq("user_id", userId);
+  let query = supabase.from("generations").select("*", { count: "exact", head: false }).eq("user_id", userId);
 
   if (filter?.model) {
     query = query.eq("model", filter.model);
@@ -404,10 +392,7 @@ export async function listGenerationErrorLogs(
   const to = page * limit - 1;
   const { column, ascending } = mapSortToOrderErrorLogs(sort);
 
-  let query = supabase
-    .from("generation_error_logs")
-    .select("*", { count: "exact", head: false })
-    .eq("user_id", userId);
+  let query = supabase.from("generation_error_logs").select("*", { count: "exact", head: false }).eq("user_id", userId);
 
   if (filter?.model) {
     query = query.eq("model", filter.model);

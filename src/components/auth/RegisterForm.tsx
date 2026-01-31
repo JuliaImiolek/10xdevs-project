@@ -2,19 +2,9 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorNotification } from "@/components/generate/ErrorNotification";
-import {
-  validateEmail,
-  validatePassword,
-  validatePasswordConfirm,
-} from "@/lib/validations/auth";
+import { validateEmail, validatePassword, validatePasswordConfirm } from "@/lib/validations/auth";
 
 function RegisterForm() {
   const emailId = React.useId();
@@ -88,9 +78,7 @@ function RegisterForm() {
         <h1 className="text-2xl font-bold" id="register-heading">
           Rejestracja
         </h1>
-        <p className="text-muted-foreground">
-          Utwórz konto, aby zapisywać fiszki i korzystać z sesji nauki.
-        </p>
+        <p className="text-muted-foreground">Utwórz konto, aby zapisywać fiszki i korzystać z sesji nauki.</p>
       </header>
 
       <Card>

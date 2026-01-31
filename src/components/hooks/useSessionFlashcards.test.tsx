@@ -203,7 +203,9 @@ describe("useSessionFlashcards", () => {
         .mockResolvedValueOnce({
           ok: true,
           data: {
-            data: [{ id: 1, front: "F", back: "B", source: "manual", generation_id: null, created_at: "", updated_at: "" }],
+            data: [
+              { id: 1, front: "F", back: "B", source: "manual", generation_id: null, created_at: "", updated_at: "" },
+            ],
             pagination: { page: 1, limit: 50, total: 1 },
           },
         });

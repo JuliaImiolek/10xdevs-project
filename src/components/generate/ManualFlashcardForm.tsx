@@ -48,12 +48,7 @@ function validate(front: string, back: string): FormErrors {
  * Two fields: front (przód) and back (tył) with character limits.
  * On submit, validates and POSTs to /api/flashcards; on success clears form and calls onSuccess.
  */
-function ManualFlashcardForm({
-  onSuccess,
-  onError,
-  disabled = false,
-  className,
-}: ManualFlashcardFormProps) {
+function ManualFlashcardForm({ onSuccess, onError, disabled = false, className }: ManualFlashcardFormProps) {
   const [front, setFront] = React.useState("");
   const [back, setBack] = React.useState("");
   const [errors, setErrors] = React.useState<FormErrors>({});
@@ -128,22 +123,16 @@ function ManualFlashcardForm({
   );
 
   return (
-    <section
-      className={cn("space-y-4", className)}
-      aria-labelledby="manual-flashcard-heading"
-    >
+    <section className={cn("space-y-4", className)} aria-labelledby="manual-flashcard-heading">
       <h2 id="manual-flashcard-heading" className="text-lg font-semibold">
         Ręcznie dodaj fiszkę
       </h2>
       <p className="text-sm text-muted-foreground">
-        Wypełnij pola „przód” i „tył”. Po zatwierdzeniu fiszka zostanie zapisana
-        i będzie dostępna na liście fiszek.
+        Wypełnij pola „przód” i „tył”. Po zatwierdzeniu fiszka zostanie zapisana i będzie dostępna na liście fiszek.
       </p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor={frontId}>
-            Przód
-          </Label>
+          <Label htmlFor={frontId}>Przód</Label>
           <Input
             id={frontId}
             type="text"
@@ -160,19 +149,13 @@ function ManualFlashcardForm({
             {front.length} / {MANUAL_FRONT_MAX} znaków
           </p>
           {errors.front && (
-            <p
-              id={frontErrorId}
-              className="text-sm text-destructive"
-              role="alert"
-            >
+            <p id={frontErrorId} className="text-sm text-destructive" role="alert">
               {errors.front}
             </p>
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor={backId}>
-            Tył
-          </Label>
+          <Label htmlFor={backId}>Tył</Label>
           <Textarea
             id={backId}
             value={back}
@@ -189,21 +172,13 @@ function ManualFlashcardForm({
             {back.length} / {MANUAL_BACK_MAX} znaków
           </p>
           {errors.back && (
-            <p
-              id={backErrorId}
-              className="text-sm text-destructive"
-              role="alert"
-            >
+            <p id={backErrorId} className="text-sm text-destructive" role="alert">
               {errors.back}
             </p>
           )}
         </div>
         {successMessage && (
-          <p
-            className="text-sm text-green-600 dark:text-green-400"
-            role="status"
-            aria-live="polite"
-          >
+          <p className="text-sm text-green-600 dark:text-green-400" role="status" aria-live="polite">
             {successMessage}
           </p>
         )}
@@ -212,11 +187,7 @@ function ManualFlashcardForm({
             {submitError}
           </p>
         )}
-        <Button
-          type="submit"
-          disabled={formDisabled}
-          aria-label="Zapisz fiszkę"
-        >
+        <Button type="submit" disabled={formDisabled} aria-label="Zapisz fiszkę">
           {submitting ? "Zapisywanie…" : "Dodaj fiszkę"}
         </Button>
       </form>

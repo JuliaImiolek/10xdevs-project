@@ -1,9 +1,5 @@
 import * as React from "react";
-import type {
-  FlashcardDto,
-  PaginationDto,
-  FlashcardsListSort,
-} from "@/types";
+import type { FlashcardDto, PaginationDto, FlashcardsListSort } from "@/types";
 import { fetchFlashcardsList } from "@/lib/flashcards-api";
 
 const DEFAULT_PAGE = 1;
@@ -43,9 +39,7 @@ export function useFlashcardsList(): UseFlashcardsListResult {
   const [page, setPage] = React.useState(DEFAULT_PAGE);
   const [limit] = React.useState(DEFAULT_LIMIT);
   const [sort, setSort] = React.useState<FlashcardsListSort>(DEFAULT_SORT);
-  const [sourceFilter, setSourceFilter] = React.useState<
-    "manual" | "ai-full" | "ai-edited" | undefined
-  >(undefined);
+  const [sourceFilter, setSourceFilter] = React.useState<"manual" | "ai-full" | "ai-edited" | undefined>(undefined);
 
   const fetchList = React.useCallback(async () => {
     setLoading(true);

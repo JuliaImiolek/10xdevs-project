@@ -53,9 +53,7 @@ export function Toolbar({
   const handleSourceChange = React.useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const v = e.target.value;
-      onSourceFilterChange(
-        v === "" ? undefined : (v as "manual" | "ai-full" | "ai-edited")
-      );
+      onSourceFilterChange(v === "" ? undefined : (v as "manual" | "ai-full" | "ai-edited"));
     },
     [onSourceFilterChange]
   );

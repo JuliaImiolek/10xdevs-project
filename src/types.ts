@@ -78,11 +78,11 @@ export type FlashcardUpdateDto = Partial<{
 //     Body for PUT /api/flashcards/{id}. At least one field required.
 //     source only "ai-edited" | "manual" (API validation: front 1–200, back 1–500).
 // ------------------------------------------------------------------------------------------------
-export type FlashcardPutPayload = {
+export interface FlashcardPutPayload {
   front?: string;
   back?: string;
   source?: "ai-edited" | "manual";
-};
+}
 
 // ------------------------------------------------------------------------------------------------
 // 5b. Flashcards List Query Params (View)

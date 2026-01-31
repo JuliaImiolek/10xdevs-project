@@ -39,26 +39,17 @@ export const GET: APIRoute = async (context) => {
 
   const userId = locals.userId;
   if (!userId) {
-    return json(
-      { error: "Unauthorized", message: "Authentication required" },
-      401
-    );
+    return json({ error: "Unauthorized", message: "Authentication required" }, 401);
   }
 
   const result = await getGenerationById(supabase, userId, parsed.data);
 
   if (!result.success) {
-    return json(
-      { error: "Internal Server Error", message: "Failed to fetch generation" },
-      500
-    );
+    return json({ error: "Internal Server Error", message: "Failed to fetch generation" }, 500);
   }
 
   if (result.data === null) {
-    return json(
-      { error: "Not Found", message: "Generation not found" },
-      404
-    );
+    return json({ error: "Not Found", message: "Generation not found" }, 404);
   }
 
   return json(result.data, 200);

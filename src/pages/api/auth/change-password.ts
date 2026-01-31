@@ -25,8 +25,7 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
   const parsed = changePasswordBodySchema.safeParse(body);
   if (!parsed.success) {
     const first = parsed.error.flatten().fieldErrors;
-    const message =
-      (first.current_password?.[0] as string) ?? (first.new_password?.[0] as string) ?? "Błąd walidacji.";
+    const message = (first.current_password?.[0] as string) ?? (first.new_password?.[0] as string) ?? "Błąd walidacji.";
     return json({ error: "Validation error", message }, 400);
   }
 
@@ -40,10 +39,11 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
 
   if (signInError) {
     const message =
-      signInError.message === "Invalid login credentials"
-        ? "Obecne hasło jest nieprawidłowe."
-        : signInError.message;
-    return json({ error: message, message: "Obecne hasło jest nieprawidłowe lub wystąpił błąd. Spróbuj ponownie." }, 400);
+      signInError.message === "Invalid login credentials" ? "Obecne hasło jest nieprawidłowe." : signInError.message;
+    return json(
+      { error: message, message: "Obecne hasło jest nieprawidłowe lub wystąpił błąd. Spróbuj ponownie." },
+      400
+    );
   }
 
   const { error: updateError } = await supabase.auth.updateUser({ password: new_password });

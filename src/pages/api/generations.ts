@@ -5,11 +5,7 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import { json } from "../../lib/api-response";
-import {
-  createGeneration,
-  listGenerations,
-  type ListGenerationsOptions,
-} from "../../lib/services/generation.service";
+import { createGeneration, listGenerations, type ListGenerationsOptions } from "../../lib/services/generation.service";
 
 export const prerender = false;
 
@@ -21,14 +17,8 @@ export const generationRequestSchema = z.object({
   source_text: z
     .string()
     .min(1, "source_text is required")
-    .min(
-      SOURCE_TEXT_MIN_LENGTH,
-      `source_text must be at least ${SOURCE_TEXT_MIN_LENGTH} characters`
-    )
-    .max(
-      SOURCE_TEXT_MAX_LENGTH,
-      `source_text must be at most ${SOURCE_TEXT_MAX_LENGTH} characters`
-    ),
+    .min(SOURCE_TEXT_MIN_LENGTH, `source_text must be at least ${SOURCE_TEXT_MIN_LENGTH} characters`)
+    .max(SOURCE_TEXT_MAX_LENGTH, `source_text must be at most ${SOURCE_TEXT_MAX_LENGTH} characters`),
   metadata: z.record(z.unknown()).optional(),
 });
 
@@ -58,30 +48,17 @@ export const generationsListQuerySchema = z
   .object({
     page: z
       .union([z.string(), z.number(), z.undefined()])
-      .transform((v) =>
-        v === undefined || v === "" ? DEFAULT_PAGE : Number(v)
-      )
+      .transform((v) => (v === undefined || v === "" ? DEFAULT_PAGE : Number(v)))
       .pipe(z.number().int().min(1, "Page must be at least 1")),
     limit: z
       .union([z.string(), z.number(), z.undefined()])
-      .transform((v) =>
-        v === undefined || v === "" ? DEFAULT_LIMIT : Number(v)
-      )
-      .pipe(
-        z
-          .number()
-          .int()
-          .min(1, "Limit must be at least 1")
-          .max(MAX_LIMIT, `Limit must be at most ${MAX_LIMIT}`)
-      ),
+      .transform((v) => (v === undefined || v === "" ? DEFAULT_LIMIT : Number(v)))
+      .pipe(z.number().int().min(1, "Limit must be at least 1").max(MAX_LIMIT, `Limit must be at most ${MAX_LIMIT}`)),
     sort: z
       .string()
       .optional()
       .default("created_at_desc")
-      .refine(
-        (v) => generationsListSortEnum.safeParse(v).success,
-        "Invalid sort value"
-      )
+      .refine((v) => generationsListSortEnum.safeParse(v).success, "Invalid sort value")
       .transform((v) => v as z.infer<typeof generationsListSortEnum>),
     // Optional filters (empty string treated as absent)
     model: z
@@ -204,10 +181,7 @@ export const GET: APIRoute = async (context) => {
   const supabase = locals.supabase;
   const userId = locals.userId;
   if (!userId) {
-    return json(
-      { error: "Unauthorized", message: "Authentication required" },
-      401
-    );
+    return json({ error: "Unauthorized", message: "Authentication required" }, 401);
   }
 
   const url = new URL(request.url);
@@ -232,10 +206,7 @@ export const GET: APIRoute = async (context) => {
     return json(result.data, 200);
   }
 
-  return json(
-    { error: "Internal Server Error", message: "Failed to list generations" },
-    500
-  );
+  return json({ error: "Internal Server Error", message: "Failed to list generations" }, 500);
 };
 
 export const POST: APIRoute = async (context) => {
@@ -243,10 +214,7 @@ export const POST: APIRoute = async (context) => {
   const supabase = locals.supabase;
   const userId = locals.userId;
   if (!userId) {
-    return json(
-      { error: "Unauthorized", message: "Authentication required" },
-      401
-    );
+    return json({ error: "Unauthorized", message: "Authentication required" }, 401);
   }
 
   // Parse and validate body
@@ -254,33 +222,22 @@ export const POST: APIRoute = async (context) => {
   try {
     body = await request.json();
   } catch {
-    return json(
-      { error: "Bad Request", message: "Invalid JSON body" },
-      400
-    );
+    return json({ error: "Bad Request", message: "Invalid JSON body" }, 400);
   }
 
   const parsed = generationRequestSchema.safeParse(body);
   if (!parsed.success) {
     const first = parsed.error.flatten().fieldErrors;
-    const message =
-      first.source_text?.join(" ") ?? parsed.error.message;
-    return json(
-      { error: "Validation Error", message, details: first },
-      400
-    );
+    const message = first.source_text?.join(" ") ?? parsed.error.message;
+    return json({ error: "Validation Error", message, details: first }, 400);
   }
 
   let result: Awaited<ReturnType<typeof createGeneration>>;
   try {
     result = await createGeneration(supabase, userId, parsed.data);
   } catch (err) {
-    const rawMessage =
-      err instanceof Error ? err.message : "Unexpected error during generation";
-    const causeMessage =
-      err instanceof Error && err.cause instanceof Error
-        ? err.cause.message
-        : null;
+    const rawMessage = err instanceof Error ? err.message : "Unexpected error during generation";
+    const causeMessage = err instanceof Error && err.cause instanceof Error ? err.cause.message : null;
     console.error("[POST /api/generations]", err);
     if (causeMessage) {
       console.error("[POST /api/generations] cause:", causeMessage);
@@ -290,10 +247,7 @@ export const POST: APIRoute = async (context) => {
       rawMessage === "fetch failed" || rawMessage.includes("fetch failed")
         ? "Request to an external service failed (network, DNS, or timeout). Check OPENROUTER_API_KEY and connectivity; slow models may need more time."
         : rawMessage;
-    return json(
-      { error: "Internal Server Error", message },
-      500
-    );
+    return json({ error: "Internal Server Error", message }, 500);
   }
 
   if (result.success) {
@@ -316,8 +270,5 @@ export const POST: APIRoute = async (context) => {
   const message = result.errorMessage?.includes("fetch failed")
     ? "Database connection failed (Supabase unreachable). Check SUPABASE_URL and SUPABASE_KEY in .env and that the Supabase project is not paused."
     : (result.errorMessage ?? "Database error");
-  return json(
-    { error: "Internal Server Error", message },
-    500
-  );
+  return json({ error: "Internal Server Error", message }, 500);
 };

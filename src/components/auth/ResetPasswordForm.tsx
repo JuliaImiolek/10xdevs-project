@@ -2,18 +2,9 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorNotification } from "@/components/generate/ErrorNotification";
-import {
-  validatePassword,
-  validatePasswordConfirm,
-} from "@/lib/validations/auth";
+import { validatePassword, validatePasswordConfirm } from "@/lib/validations/auth";
 
 function parseAccessTokenFromHash(): string {
   if (typeof window === "undefined") return "";
@@ -74,9 +65,7 @@ function ResetPasswordForm({ token: tokenProp }: ResetPasswordFormProps) {
         const data = await res.json().catch(() => ({}));
 
         if (res.ok) {
-          setSuccessMessage(
-            data?.message ?? "Hasło zostało zmienione. Możesz się zalogować."
-          );
+          setSuccessMessage(data?.message ?? "Hasło zostało zmienione. Możesz się zalogować.");
           setPassword("");
           setConfirmPassword("");
           setPasswordError(null);
@@ -104,9 +93,7 @@ function ResetPasswordForm({ token: tokenProp }: ResetPasswordFormProps) {
       <div className="space-y-6">
         <header>
           <h1 className="text-2xl font-bold">Ustawienie nowego hasła</h1>
-          <p className="text-muted-foreground">
-            Brak tokenu. Użyj linku z e-maila dotyczącego resetu hasła.
-          </p>
+          <p className="text-muted-foreground">Brak tokenu. Użyj linku z e-maila dotyczącego resetu hasła.</p>
         </header>
         <p className="text-sm text-muted-foreground">
           <a href="/forgot-password" className="text-primary underline underline-offset-4 hover:no-underline">
@@ -123,9 +110,7 @@ function ResetPasswordForm({ token: tokenProp }: ResetPasswordFormProps) {
         <h1 className="text-2xl font-bold" id="reset-heading">
           Ustawienie nowego hasła
         </h1>
-        <p className="text-muted-foreground">
-          Wprowadź nowe hasło (min. 6 znaków).
-        </p>
+        <p className="text-muted-foreground">Wprowadź nowe hasło (min. 6 znaków).</p>
       </header>
 
       <Card>

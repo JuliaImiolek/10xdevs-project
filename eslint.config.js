@@ -56,11 +56,27 @@ const reactConfig = tseslint.config({
   },
 });
 
+// Node.js scripts: allow process, console, and CommonJS
+const nodeConfig = tseslint.config({
+  files: ["**/*.mjs", "scripts/**", ".github/scripts/**", ".github/actions/**"],
+  languageOptions: {
+    globals: {
+      process: "readonly",
+      console: "readonly",
+    },
+  },
+  rules: {
+    "no-console": "off",
+  },
+});
+
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
+  { ignores: ["src/db/database.types.ts"] },
   baseConfig,
   jsxA11yConfig,
   reactConfig,
+  nodeConfig,
   eslintPluginAstro.configs["flat/recommended"],
   eslintPluginPrettier
 );

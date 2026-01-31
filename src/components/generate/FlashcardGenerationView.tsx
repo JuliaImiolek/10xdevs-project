@@ -7,10 +7,7 @@ import { BulkSaveButton } from "./BulkSaveButton";
 import { ErrorNotification } from "./ErrorNotification";
 import { ManualFlashcardForm } from "./ManualFlashcardForm";
 import { useFlashcardGeneration } from "@/components/hooks/useFlashcardGeneration";
-import {
-  TEXT_INPUT_MIN_LENGTH,
-  TEXT_INPUT_MAX_LENGTH,
-} from "./TextInputArea";
+import { TEXT_INPUT_MIN_LENGTH, TEXT_INPUT_MAX_LENGTH } from "./TextInputArea";
 
 /**
  * Main view for generating flashcards from source text.
@@ -36,8 +33,8 @@ function FlashcardGenerationView() {
       <header>
         <h1 className="text-2xl font-bold">Generuj fiszki</h1>
         <p className="text-muted-foreground">
-          Wprowadź tekst (od {TEXT_INPUT_MIN_LENGTH} do {TEXT_INPUT_MAX_LENGTH}{" "}
-          znaków), a następnie wygeneruj propozycje fiszek.
+          Wprowadź tekst (od {TEXT_INPUT_MIN_LENGTH} do {TEXT_INPUT_MAX_LENGTH} znaków), a następnie wygeneruj
+          propozycje fiszek.
         </p>
       </header>
 
@@ -68,11 +65,7 @@ function FlashcardGenerationView() {
 
       {!loading && flashcards.length > 0 && (
         <>
-          <FlashcardList
-            flashcards={flashcards}
-            onAction={handleListAction}
-            onUpdate={handleFlashcardUpdate}
-          />
+          <FlashcardList flashcards={flashcards} onAction={handleListAction} onUpdate={handleFlashcardUpdate} />
           <BulkSaveButton flashcards={flashcards} onSave={handleSave} />
         </>
       )}

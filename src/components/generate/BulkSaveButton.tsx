@@ -30,16 +30,10 @@ function toCreateDtos(list: FlashcardViewModel[]): FlashcardCreateDto[] {
  */
 function BulkSaveButton({ flashcards, onSave, className }: BulkSaveButtonProps) {
   const accepted = React.useMemo(
-    () =>
-      flashcards.filter(
-        (f) => f.status === "accepted" || f.status === "edited"
-      ),
+    () => flashcards.filter((f) => f.status === "accepted" || f.status === "edited"),
     [flashcards]
   );
-  const notRejected = React.useMemo(
-    () => flashcards.filter((f) => f.status !== "rejected"),
-    [flashcards]
-  );
+  const notRejected = React.useMemo(() => flashcards.filter((f) => f.status !== "rejected"), [flashcards]);
   const hasAccepted = accepted.length > 0;
   const hasAnyToSave = notRejected.length > 0;
   const hasAny = flashcards.length > 0;
@@ -55,11 +49,7 @@ function BulkSaveButton({ flashcards, onSave, className }: BulkSaveButtonProps) 
   if (!hasAny) return null;
 
   return (
-    <div
-      className={cn("flex flex-wrap gap-2", className)}
-      role="group"
-      aria-label="Zapis fiszek"
-    >
+    <div className={cn("flex flex-wrap gap-2", className)} role="group" aria-label="Zapis fiszek">
       <Button
         type="button"
         onClick={handleSaveAccepted}

@@ -1,10 +1,6 @@
 import * as React from "react";
 import type { SessionGrade } from "@/types";
-import {
-  SESSION_GRADE_AGAIN,
-  SESSION_GRADE_GOOD,
-  SESSION_GRADE_EASY,
-} from "@/types";
+import { SESSION_GRADE_AGAIN, SESSION_GRADE_GOOD, SESSION_GRADE_EASY } from "@/types";
 import { Button } from "@/components/ui/button";
 
 export interface SessionControlsProps {
@@ -24,13 +20,7 @@ const GRADE_LABELS: Record<SessionGrade, string> = {
 /**
  * Przycisk „Pokaż odpowiedź” (gdy !revealed); po odsłonięciu — przyciski oceny (Źle / Średnio / Dobrze) i opcjonalnie „Pomiń”.
  */
-export function SessionControls({
-  revealed,
-  onReveal,
-  onRate,
-  onSkip,
-  disabled = false,
-}: SessionControlsProps) {
+export function SessionControls({ revealed, onReveal, onRate, onSkip, disabled = false }: SessionControlsProps) {
   const handleReveal = React.useCallback(() => {
     onReveal();
   }, [onReveal]);
@@ -49,13 +39,7 @@ export function SessionControls({
   if (!revealed) {
     return (
       <div className="flex justify-center">
-        <Button
-          type="button"
-          size="lg"
-          onClick={handleReveal}
-          disabled={disabled}
-          aria-label="Pokaż odpowiedź"
-        >
+        <Button type="button" size="lg" onClick={handleReveal} disabled={disabled} aria-label="Pokaż odpowiedź">
           Pokaż odpowiedź
         </Button>
       </div>

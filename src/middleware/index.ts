@@ -5,9 +5,7 @@ const PROTECTED_PATHS = ["/generate", "/flashcards", "/session", "/account"];
 const AUTH_ONLY_PATHS = ["/auth/login", "/auth/register", "/auth/forgot-password", "/auth/reset-password"];
 
 const isProtectedPath = (pathname: string): boolean =>
-  PROTECTED_PATHS.includes(pathname) ||
-  pathname.startsWith("/flashcards/") ||
-  pathname.startsWith("/session/");
+  PROTECTED_PATHS.includes(pathname) || pathname.startsWith("/flashcards/") || pathname.startsWith("/session/");
 
 const isAuthOnlyPath = (pathname: string): boolean => AUTH_ONLY_PATHS.includes(pathname);
 

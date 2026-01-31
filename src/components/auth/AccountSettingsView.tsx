@@ -11,9 +11,7 @@ function AccountSettingsView() {
     <main role="main" aria-label="Ustawienia konta" className="space-y-8">
       <header>
         <h1 className="text-2xl font-bold">Ustawienia konta</h1>
-        <p className="text-muted-foreground">
-          Zmień hasło lub trwale usuń konto i wszystkie powiązane dane.
-        </p>
+        <p className="text-muted-foreground">Zmień hasło lub trwale usuń konto i wszystkie powiązane dane.</p>
       </header>
 
       <ChangePasswordForm />

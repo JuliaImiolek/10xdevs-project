@@ -121,9 +121,7 @@ export interface OpenRouterStructuredError {
   rawContent?: string;
 }
 
-export type OpenRouterStructuredResult<T> =
-  | OpenRouterStructuredSuccess<T>
-  | OpenRouterStructuredError;
+export type OpenRouterStructuredResult<T> = OpenRouterStructuredSuccess<T> | OpenRouterStructuredError;
 
 // ------------------------------------------------------------------------------------------------
 // Opcje wywołania chat() / chatWithStructuredOutput()

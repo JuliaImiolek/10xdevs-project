@@ -29,8 +29,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const parsed = loginBodySchema.safeParse(body);
   if (!parsed.success) {
     const first = parsed.error.flatten().fieldErrors;
-    const message =
-      (first.email?.[0] as string) ?? (first.password?.[0] as string) ?? "Błąd walidacji.";
+    const message = (first.email?.[0] as string) ?? (first.password?.[0] as string) ?? "Błąd walidacji.";
     return json({ error: "Validation error", message }, 400);
   }
 
@@ -44,9 +43,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   if (error) {
     const message =
-      error.message === "Invalid login credentials"
-        ? "Nieprawidłowy adres e-mail lub hasło."
-        : error.message;
+      error.message === "Invalid login credentials" ? "Nieprawidłowy adres e-mail lub hasło." : error.message;
     return json({ error: message }, 401);
   }
 

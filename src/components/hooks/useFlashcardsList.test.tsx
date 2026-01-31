@@ -192,9 +192,7 @@ describe("useFlashcardsList", () => {
       });
 
       await waitFor(() => {
-        expect(mockFetchFlashcardsList).toHaveBeenLastCalledWith(
-          expect.objectContaining({ page: 2 })
-        );
+        expect(mockFetchFlashcardsList).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 }));
       });
     });
 
@@ -215,9 +213,7 @@ describe("useFlashcardsList", () => {
       });
 
       await waitFor(() => {
-        expect(mockFetchFlashcardsList).toHaveBeenLastCalledWith(
-          expect.objectContaining({ sort: "updated_at" })
-        );
+        expect(mockFetchFlashcardsList).toHaveBeenLastCalledWith(expect.objectContaining({ sort: "updated_at" }));
       });
     });
 
@@ -238,9 +234,7 @@ describe("useFlashcardsList", () => {
       });
 
       await waitFor(() => {
-        expect(mockFetchFlashcardsList).toHaveBeenLastCalledWith(
-          expect.objectContaining({ source: "manual" })
-        );
+        expect(mockFetchFlashcardsList).toHaveBeenLastCalledWith(expect.objectContaining({ source: "manual" }));
       });
     });
   });

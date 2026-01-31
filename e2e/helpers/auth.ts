@@ -18,9 +18,7 @@ export async function loginAsTestUser(
   const email = process.env.E2E_USERNAME;
   const password = process.env.E2E_PASSWORD;
   if (!email || !password) {
-    throw new Error(
-      "E2E_USERNAME i E2E_PASSWORD muszą być ustawione w .env.test do testów wymagających logowania."
-    );
+    throw new Error("E2E_USERNAME i E2E_PASSWORD muszą być ustawione w .env.test do testów wymagających logowania.");
   }
 
   const loginPage = new LoginPage(page);

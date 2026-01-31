@@ -2,7 +2,6 @@ import * as React from "react";
 import type { FlashcardDto } from "@/types";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 const SOURCE_LABELS: Record<string, string> = {
   manual: "Ręcznie",
@@ -20,11 +19,7 @@ export interface FlashcardListCardProps {
   onDelete: (f: FlashcardDto) => void;
 }
 
-export function FlashcardListCard({
-  flashcard,
-  onEdit,
-  onDelete,
-}: FlashcardListCardProps) {
+export function FlashcardListCard({ flashcard, onEdit, onDelete }: FlashcardListCardProps) {
   const handleEdit = React.useCallback(() => {
     onEdit(flashcard);
   }, [flashcard, onEdit]);
@@ -45,17 +40,10 @@ export function FlashcardListCard({
       </CardHeader>
       <CardContent className="space-y-2">
         <p className="text-sm font-medium leading-tight" title={flashcard.front}>
-          {flashcard.front.length > 120
-            ? `${flashcard.front.slice(0, 120)}…`
-            : flashcard.front}
+          {flashcard.front.length > 120 ? `${flashcard.front.slice(0, 120)}…` : flashcard.front}
         </p>
-        <p
-          className="text-sm text-muted-foreground leading-snug line-clamp-2"
-          title={flashcard.back}
-        >
-          {flashcard.back.length > 150
-            ? `${flashcard.back.slice(0, 150)}…`
-            : flashcard.back}
+        <p className="text-sm text-muted-foreground leading-snug line-clamp-2" title={flashcard.back}>
+          {flashcard.back.length > 150 ? `${flashcard.back.slice(0, 150)}…` : flashcard.back}
         </p>
       </CardContent>
       <CardFooter className="flex gap-2 pt-2">

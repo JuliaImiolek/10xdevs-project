@@ -3,9 +3,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { FlashcardListItem } from "./FlashcardListItem";
 import type { FlashcardViewModel } from "@/types";
 
-function makeFlashcard(
-  overrides: Partial<FlashcardViewModel> & { id: string }
-): FlashcardViewModel {
+function makeFlashcard(overrides: Partial<FlashcardViewModel> & { id: string }): FlashcardViewModel {
   return {
     id: overrides.id,
     front: "Przód",
@@ -20,41 +18,21 @@ function makeFlashcard(
 describe("FlashcardListItem", () => {
   it("wywołuje onAction('accept') po kliknięciu Akceptuj", () => {
     const onAction = vi.fn();
-    render(
-      <FlashcardListItem
-        flashcard={makeFlashcard({ id: "1" })}
-        onAction={onAction}
-        onUpdate={vi.fn()}
-      />
-    );
-    fireEvent.click(
-      screen.getByRole("button", { name: /zaakceptuj fiszkę/i })
-    );
+    render(<FlashcardListItem flashcard={makeFlashcard({ id: "1" })} onAction={onAction} onUpdate={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /zaakceptuj fiszkę/i }));
     expect(onAction).toHaveBeenCalledWith("accept");
   });
 
   it("wywołuje onAction('reject') po kliknięciu Odrzuć", () => {
     const onAction = vi.fn();
-    render(
-      <FlashcardListItem
-        flashcard={makeFlashcard({ id: "1" })}
-        onAction={onAction}
-        onUpdate={vi.fn()}
-      />
-    );
+    render(<FlashcardListItem flashcard={makeFlashcard({ id: "1" })} onAction={onAction} onUpdate={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /odrzuć fiszkę/i }));
     expect(onAction).toHaveBeenCalledWith("reject");
   });
 
   it("wywołuje onAction('edit') po kliknięciu Edytuj", () => {
     const onAction = vi.fn();
-    render(
-      <FlashcardListItem
-        flashcard={makeFlashcard({ id: "1" })}
-        onAction={onAction}
-        onUpdate={vi.fn()}
-      />
-    );
+    render(<FlashcardListItem flashcard={makeFlashcard({ id: "1" })} onAction={onAction} onUpdate={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /edytuj fiszkę/i }));
     expect(onAction).toHaveBeenCalledWith("edit");
   });
@@ -104,8 +82,6 @@ describe("FlashcardListItem", () => {
         onUpdate={vi.fn()}
       />
     );
-    expect(
-      screen.getByRole("button", { name: /odrzuć fiszkę/i })
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: /odrzuć fiszkę/i })).toBeDisabled();
   });
 });

@@ -109,10 +109,7 @@ describe("SessionView", () => {
 
   describe("zakończona sesja (sessionEnded)", () => {
     it("pokazuje SessionSummary z liczbą powtórzonych fiszek i przycisk Restart", async () => {
-      const cards: FlashcardDto[] = [
-        makeFlashcard(1, "P1", "O1"),
-        makeFlashcard(2, "P2", "O2"),
-      ];
+      const cards: FlashcardDto[] = [makeFlashcard(1, "P1", "O1"), makeFlashcard(2, "P2", "O2")];
       mockUseSessionFlashcards.mockReturnValue({
         data: cards,
         loading: false,
@@ -185,10 +182,7 @@ describe("SessionView", () => {
     });
 
     it("po ocenie wywołuje submitReview z id fiszki i grade, przechodzi do następnej karty", async () => {
-      const cards = [
-        makeFlashcard(10, "P1", "O1"),
-        makeFlashcard(20, "P2", "O2"),
-      ];
+      const cards = [makeFlashcard(10, "P1", "O1"), makeFlashcard(20, "P2", "O2")];
       mockUseSessionFlashcards.mockReturnValue({
         data: cards,
         loading: false,
@@ -213,10 +207,7 @@ describe("SessionView", () => {
     });
 
     it("po Pomiń przechodzi do następnej karty bez wywołania submitReview", async () => {
-      const cards = [
-        makeFlashcard(1, "P1", "O1"),
-        makeFlashcard(2, "P2", "O2"),
-      ];
+      const cards = [makeFlashcard(1, "P1", "O1"), makeFlashcard(2, "P2", "O2")];
       mockUseSessionFlashcards.mockReturnValue({
         data: cards,
         loading: false,
@@ -258,5 +249,4 @@ describe("SessionView", () => {
       expect(mockSubmitReview).toHaveBeenCalledWith(1, 3);
     });
   });
-
 });

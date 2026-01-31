@@ -10,28 +10,20 @@ import type {
   FlashcardPutPayload,
 } from "../types";
 
-export type ApiError = {
+export interface ApiError {
   status: number;
   error?: string;
   message?: string;
   details?: Record<string, string[] | undefined>;
-};
+}
 
-export type ListResult =
-  | { ok: true; data: FlashcardsListResponseDto }
-  | { ok: false; error: ApiError };
+export type ListResult = { ok: true; data: FlashcardsListResponseDto } | { ok: false; error: ApiError };
 
-export type UpdateResult =
-  | { ok: true; data: FlashcardDto }
-  | { ok: false; error: ApiError };
+export type UpdateResult = { ok: true; data: FlashcardDto } | { ok: false; error: ApiError };
 
-export type DeleteResult =
-  | { ok: true; data: { message: string } }
-  | { ok: false; error: ApiError };
+export type DeleteResult = { ok: true; data: { message: string } } | { ok: false; error: ApiError };
 
-export type CreateResult =
-  | { ok: true; data: { flashcards: FlashcardDto[] } }
-  | { ok: false; error: ApiError };
+export type CreateResult = { ok: true; data: { flashcards: FlashcardDto[] } } | { ok: false; error: ApiError };
 
 function buildListUrl(params: FlashcardsListQueryParams): string {
   const search = new URLSearchParams();
@@ -58,15 +50,13 @@ async function parseJsonResponse<T>(response: Response): Promise<T> {
 /**
  * GET /api/flashcards – list flashcards with pagination, sort, and optional source filter.
  */
-export async function fetchFlashcardsList(
-  params: FlashcardsListQueryParams
-): Promise<ListResult> {
+export async function fetchFlashcardsList(params: FlashcardsListQueryParams): Promise<ListResult> {
   const url = buildListUrl(params);
   const response = await fetch(url, { method: "GET", credentials: "include" });
 
-  const body = await parseJsonResponse<FlashcardsListResponseDto | { error?: string; message?: string; details?: Record<string, string[] | undefined> }>(
-    response
-  );
+  const body = await parseJsonResponse<
+    FlashcardsListResponseDto | { error?: string; message?: string; details?: Record<string, string[] | undefined> }
+  >(response);
 
   if (response.ok) {
     return { ok: true, data: body as FlashcardsListResponseDto };
@@ -87,10 +77,7 @@ export async function fetchFlashcardsList(
 /**
  * PUT /api/flashcards/{id} – update a flashcard. Body: FlashcardPutPayload.
  */
-export async function updateFlashcard(
-  id: number,
-  payload: FlashcardPutPayload
-): Promise<UpdateResult> {
+export async function updateFlashcard(id: number, payload: FlashcardPutPayload): Promise<UpdateResult> {
   const response = await fetch(`/api/flashcards/${id}`, {
     method: "PUT",
     credentials: "include",
@@ -98,9 +85,9 @@ export async function updateFlashcard(
     body: JSON.stringify(payload),
   });
 
-  const body = await parseJsonResponse<FlashcardDto | { error?: string; message?: string; details?: Record<string, string[] | undefined> }>(
-    response
-  );
+  const body = await parseJsonResponse<
+    FlashcardDto | { error?: string; message?: string; details?: Record<string, string[] | undefined> }
+  >(response);
 
   if (response.ok) {
     return { ok: true, data: body as FlashcardDto };
@@ -122,9 +109,7 @@ export async function updateFlashcard(
  * POST /api/flashcards – create one or more flashcards.
  * Body: { flashcards: FlashcardCreateDto[] }.
  */
-export async function createFlashcards(
-  flashcards: FlashcardCreateDto[]
-): Promise<CreateResult> {
+export async function createFlashcards(flashcards: FlashcardCreateDto[]): Promise<CreateResult> {
   if (flashcards.length === 0) {
     return {
       ok: false,
@@ -143,7 +128,8 @@ export async function createFlashcards(
   });
 
   const body = await parseJsonResponse<
-    { flashcards?: FlashcardDto[] } | { error?: string; message?: string; details?: Record<string, string[] | undefined> }
+    | { flashcards?: FlashcardDto[] }
+    | { error?: string; message?: string; details?: Record<string, string[] | undefined> }
   >(response);
 
   if (response.ok && body && "flashcards" in body) {
@@ -165,14 +151,9 @@ export async function createFlashcards(
 /**
  * POST /api/flashcards/{id}/review – record SRS review (grade 1–3: Źle, Średnio, Dobrze).
  */
-export type ReviewResult =
-  | { ok: true }
-  | { ok: false; error: ApiError };
+export type ReviewResult = { ok: true } | { ok: false; error: ApiError };
 
-export async function submitReview(
-  id: number,
-  grade: 1 | 2 | 3
-): Promise<ReviewResult> {
+export async function submitReview(id: number, grade: 1 | 2 | 3): Promise<ReviewResult> {
   const response = await fetch(`/api/flashcards/${id}/review`, {
     method: "POST",
     credentials: "include",
@@ -180,9 +161,7 @@ export async function submitReview(
     body: JSON.stringify({ grade }),
   });
 
-  const body = await parseJsonResponse<{ ok?: boolean; error?: string; message?: string }>(
-    response
-  );
+  const body = await parseJsonResponse<{ ok?: boolean; error?: string; message?: string }>(response);
 
   if (response.ok && body && body.ok !== false) {
     return { ok: true };
@@ -208,9 +187,7 @@ export async function deleteFlashcard(id: number): Promise<DeleteResult> {
     credentials: "include",
   });
 
-  const body = await parseJsonResponse<{ message?: string; error?: string }>(
-    response
-  );
+  const body = await parseJsonResponse<{ message?: string; error?: string }>(response);
 
   if (response.ok) {
     const data = body as { message?: string };

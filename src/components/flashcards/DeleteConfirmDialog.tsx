@@ -9,12 +9,7 @@ export interface DeleteConfirmDialogProps {
   loading?: boolean;
 }
 
-export function DeleteConfirmDialog({
-  flashcard,
-  onClose,
-  onConfirm,
-  loading = false,
-}: DeleteConfirmDialogProps) {
+export function DeleteConfirmDialog({ flashcard, onClose, onConfirm, loading = false }: DeleteConfirmDialogProps) {
   const dialogRef = React.useRef<HTMLDialogElement>(null);
   const open = flashcard != null;
 

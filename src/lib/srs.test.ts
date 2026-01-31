@@ -1,11 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import {
-  sessionGradeToSm2,
-  scheduleReview,
-  nextReviewAtFromInterval,
-  DEFAULT_SRS_STATE,
-  type SrsState,
-} from "./srs";
+import { sessionGradeToSm2, scheduleReview, nextReviewAtFromInterval, DEFAULT_SRS_STATE, type SrsState } from "./srs";
 
 describe("sessionGradeToSm2", () => {
   it("mapuje ocenę 1 (Źle) na SM-2 grade 1", () => {

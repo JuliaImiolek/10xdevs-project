@@ -59,7 +59,10 @@ export function FlashcardsList({
   if (error) {
     return (
       <section aria-label="Lista fiszek" className="mt-6">
-        <p className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">
+        <p
+          className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          role="alert"
+        >
           {error}
         </p>
       </section>
@@ -82,11 +85,7 @@ export function FlashcardsList({
             </>
           )}
         </p>
-        <Pagination
-          pagination={pagination}
-          onPageChange={onPageChange}
-          disabled={true}
-        />
+        <Pagination pagination={pagination} onPageChange={onPageChange} disabled={true} />
       </section>
     );
   }
@@ -96,18 +95,11 @@ export function FlashcardsList({
       <ul className="space-y-4 list-none p-0 m-0">
         {flashcards.map((f) => (
           <li key={f.id}>
-            <FlashcardListCard
-              flashcard={f}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
+            <FlashcardListCard flashcard={f} onEdit={onEdit} onDelete={onDelete} />
           </li>
         ))}
       </ul>
-      <Pagination
-        pagination={pagination}
-        onPageChange={onPageChange}
-      />
+      <Pagination pagination={pagination} onPageChange={onPageChange} />
     </section>
   );
 }

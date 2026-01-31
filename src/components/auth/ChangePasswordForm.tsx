@@ -2,18 +2,9 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorNotification } from "@/components/generate/ErrorNotification";
-import {
-  validatePassword,
-  validatePasswordConfirm,
-} from "@/lib/validations/auth";
+import { validatePassword, validatePasswordConfirm } from "@/lib/validations/auth";
 
 function ChangePasswordForm() {
   const currentId = React.useId();
@@ -86,9 +77,7 @@ function ChangePasswordForm() {
       <form onSubmit={handleSubmit} aria-labelledby="change-password-heading" noValidate>
         <CardHeader>
           <CardTitle id="change-password-heading">Zmiana hasła</CardTitle>
-          <CardDescription>
-            Wprowadź obecne hasło oraz nowe hasło (min. 6 znaków).
-          </CardDescription>
+          <CardDescription>Wprowadź obecne hasło oraz nowe hasło (min. 6 znaków).</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {formError && <ErrorNotification errorMessage={formError} />}

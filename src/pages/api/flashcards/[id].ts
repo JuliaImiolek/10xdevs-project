@@ -9,20 +9,13 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import { json } from "../../../lib/api-response";
-import {
-  getFlashcardById,
-  updateFlashcard,
-  deleteFlashcard,
-} from "../../../lib/services/flashcard.service";
+import { getFlashcardById, updateFlashcard, deleteFlashcard } from "../../../lib/services/flashcard.service";
 
 export const prerender = false;
 
 /** Path param id: positive integer (BIGSERIAL). Invalid format → 400. */
 const flashcardIdParamSchema = z.object({
-  id: z.coerce
-    .number()
-    .int("Flashcard id must be an integer")
-    .positive("Flashcard id must be a positive number"),
+  id: z.coerce.number().int("Flashcard id must be an integer").positive("Flashcard id must be a positive number"),
 });
 
 /** PUT body: at least one of front, back, or source; source only "ai-edited" | "manual". */
@@ -38,15 +31,15 @@ const flashcardPutBodySchema = z
       .min(1, "back must be at least 1 character")
       .max(500, "back must be at most 500 characters")
       .optional(),
-    source: z.enum(["ai-edited", "manual"], {
-      errorMap: () => ({ message: "source must be ai-edited or manual" }),
-    }).optional(),
+    source: z
+      .enum(["ai-edited", "manual"], {
+        errorMap: () => ({ message: "source must be ai-edited or manual" }),
+      })
+      .optional(),
   })
-  .refine(
-    (data) =>
-      data.front !== undefined || data.back !== undefined || data.source !== undefined,
-    { message: "At least one of front, back, or source is required" }
-  );
+  .refine((data) => data.front !== undefined || data.back !== undefined || data.source !== undefined, {
+    message: "At least one of front, back, or source is required",
+  });
 
 export type FlashcardPutRequestBody = z.infer<typeof flashcardPutBodySchema>;
 
@@ -73,27 +66,18 @@ export const GET: APIRoute = async (context) => {
 
   const userId = locals.userId;
   if (!userId) {
-    return json(
-      { error: "Unauthorized", message: "Authentication required" },
-      401
-    );
+    return json({ error: "Unauthorized", message: "Authentication required" }, 401);
   }
 
   const supabase = locals.supabase;
   const result = await getFlashcardById(supabase, userId, parsedParams.data.id);
 
   if (!result.success) {
-    return json(
-      { error: "Internal Server Error", message: result.errorMessage },
-      500
-    );
+    return json({ error: "Internal Server Error", message: result.errorMessage }, 500);
   }
 
   if (result.data === null) {
-    return json(
-      { error: "Not Found", message: "Flashcard not found" },
-      404
-    );
+    return json({ error: "Not Found", message: "Flashcard not found" }, 404);
   }
 
   return json(result.data, 200);
@@ -124,10 +108,7 @@ export const PUT: APIRoute = async (context) => {
   try {
     body = await request.json();
   } catch {
-    return json(
-      { error: "Bad Request", message: "Invalid JSON body" },
-      400
-    );
+    return json({ error: "Bad Request", message: "Invalid JSON body" }, 400);
   }
 
   const parsedBody = flashcardPutBodySchema.safeParse(body);
@@ -146,10 +127,7 @@ export const PUT: APIRoute = async (context) => {
 
   const userId = locals.userId;
   if (!userId) {
-    return json(
-      { error: "Unauthorized", message: "Authentication required" },
-      401
-    );
+    return json({ error: "Unauthorized", message: "Authentication required" }, 401);
   }
 
   const payload = {
@@ -161,17 +139,11 @@ export const PUT: APIRoute = async (context) => {
   const result = await updateFlashcard(supabase, userId, parsedParams.data.id, payload);
 
   if (!result.success) {
-    return json(
-      { error: "Internal Server Error", message: result.errorMessage },
-      500
-    );
+    return json({ error: "Internal Server Error", message: result.errorMessage }, 500);
   }
 
   if (result.data === null) {
-    return json(
-      { error: "Not Found", message: "Flashcard not found" },
-      404
-    );
+    return json({ error: "Not Found", message: "Flashcard not found" }, 404);
   }
 
   return json(result.data, 200);
@@ -200,26 +172,17 @@ export const DELETE: APIRoute = async (context) => {
 
   const userId = locals.userId;
   if (!userId) {
-    return json(
-      { error: "Unauthorized", message: "Authentication required" },
-      401
-    );
+    return json({ error: "Unauthorized", message: "Authentication required" }, 401);
   }
 
   const result = await deleteFlashcard(supabase, userId, parsedParams.data.id);
 
   if (!result.success) {
-    return json(
-      { error: "Internal Server Error", message: result.errorMessage },
-      500
-    );
+    return json({ error: "Internal Server Error", message: result.errorMessage }, 500);
   }
 
   if (result.notFound) {
-    return json(
-      { error: "Not Found", message: "Flashcard not found" },
-      404
-    );
+    return json({ error: "Not Found", message: "Flashcard not found" }, 404);
   }
 
   return json({ message: "Flashcard deleted" }, 200);

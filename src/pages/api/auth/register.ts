@@ -24,8 +24,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const parsed = registerBodySchema.safeParse(body);
   if (!parsed.success) {
     const first = parsed.error.flatten().fieldErrors;
-    const message =
-      (first.email?.[0] as string) ?? (first.password?.[0] as string) ?? "Błąd walidacji.";
+    const message = (first.email?.[0] as string) ?? (first.password?.[0] as string) ?? "Błąd walidacji.";
     return json({ error: "Validation error", message }, 400);
   }
 

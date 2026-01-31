@@ -20,12 +20,7 @@ interface FlashcardListItemProps {
  * Single flashcard in the list with front/back, accept/edit/reject actions,
  * and inline editing with validation (front max 200, back max 500).
  */
-function FlashcardListItem({
-  flashcard,
-  onAction,
-  onUpdate,
-  className,
-}: FlashcardListItemProps) {
+function FlashcardListItem({ flashcard, onAction, onUpdate, className }: FlashcardListItemProps) {
   const [editFront, setEditFront] = React.useState(flashcard.front);
   const [editBack, setEditBack] = React.useState(flashcard.back);
   const [frontError, setFrontError] = React.useState<string | null>(null);
@@ -73,17 +68,9 @@ function FlashcardListItem({
   const isEditing = flashcard.status === "edited";
 
   return (
-    <Card
-      className={cn(
-        flashcard.status === "rejected" && "opacity-60",
-        className
-      )}
-      data-status={flashcard.status}
-    >
+    <Card className={cn(flashcard.status === "rejected" && "opacity-60", className)} data-status={flashcard.status}>
       <CardHeader className="pb-2">
-        <p className="text-muted-foreground text-xs">
-          Status: {flashcard.status}
-        </p>
+        <p className="text-muted-foreground text-xs">Status: {flashcard.status}</p>
       </CardHeader>
       <CardContent className="space-y-2">
         <div>
@@ -97,9 +84,7 @@ function FlashcardListItem({
                   const f = editFront.trim();
                   if (f.length === 0) setFrontError("Pole nie może być puste.");
                   else if (f.length > FRONT_MAX_LENGTH)
-                    setFrontError(
-                      `Maksymalnie ${FRONT_MAX_LENGTH} znaków (aktualnie: ${f.length}).`
-                    );
+                    setFrontError(`Maksymalnie ${FRONT_MAX_LENGTH} znaków (aktualnie: ${f.length}).`);
                   else setFrontError(null);
                 }}
                 rows={2}
@@ -108,11 +93,7 @@ function FlashcardListItem({
                 aria-describedby={frontError ? `${flashcard.id}-front-error` : undefined}
               />
               {frontError && (
-                <p
-                  id={`${flashcard.id}-front-error`}
-                  role="alert"
-                  className="text-destructive text-xs"
-                >
+                <p id={`${flashcard.id}-front-error`} role="alert" className="text-destructive text-xs">
                   {frontError}
                 </p>
               )}
@@ -135,9 +116,7 @@ function FlashcardListItem({
                   const b = editBack.trim();
                   if (b.length === 0) setBackError("Pole nie może być puste.");
                   else if (b.length > BACK_MAX_LENGTH)
-                    setBackError(
-                      `Maksymalnie ${BACK_MAX_LENGTH} znaków (aktualnie: ${b.length}).`
-                    );
+                    setBackError(`Maksymalnie ${BACK_MAX_LENGTH} znaków (aktualnie: ${b.length}).`);
                   else setBackError(null);
                 }}
                 rows={3}
@@ -146,11 +125,7 @@ function FlashcardListItem({
                 aria-describedby={backError ? `${flashcard.id}-back-error` : undefined}
               />
               {backError && (
-                <p
-                  id={`${flashcard.id}-back-error`}
-                  role="alert"
-                  className="text-destructive text-xs"
-                >
+                <p id={`${flashcard.id}-back-error`} role="alert" className="text-destructive text-xs">
                   {backError}
                 </p>
               )}
@@ -174,13 +149,7 @@ function FlashcardListItem({
         >
           Akceptuj
         </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={handleEdit}
-          aria-label="Edytuj fiszkę"
-        >
+        <Button type="button" size="sm" variant="outline" onClick={handleEdit} aria-label="Edytuj fiszkę">
           Edytuj
         </Button>
         <Button

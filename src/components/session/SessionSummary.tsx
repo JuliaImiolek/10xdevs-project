@@ -11,10 +11,7 @@ export interface SessionSummaryProps {
 /**
  * Wyświetlany po zakończeniu sesji: komunikat podsumowujący oraz przyciski „Rozpocznij ponownie” i „Wróć do listy fiszek”.
  */
-export function SessionSummary({
-  totalReviewed,
-  onRestart,
-}: SessionSummaryProps) {
+export function SessionSummary({ totalReviewed, onRestart }: SessionSummaryProps) {
   const handleRestart = React.useCallback(() => {
     onRestart();
   }, [onRestart]);
@@ -30,19 +27,10 @@ export function SessionSummary({
         </p>
       </CardContent>
       <CardFooter className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          onClick={handleRestart}
-          aria-label="Rozpocznij sesję ponownie"
-        >
+        <Button type="button" onClick={handleRestart} aria-label="Rozpocznij sesję ponownie">
           Rozpocznij ponownie
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          asChild
-          aria-label="Wróć do listy fiszek"
-        >
+        <Button type="button" variant="outline" asChild aria-label="Wróć do listy fiszek">
           <a href="/flashcards">Wróć do listy fiszek</a>
         </Button>
       </CardFooter>

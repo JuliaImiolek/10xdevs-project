@@ -2,9 +2,7 @@ import { expect, test } from "@playwright/test";
 import { HomePage } from "./pages/HomePage";
 
 test.describe("Strona główna", () => {
-  test("wyświetla tytuł i linki do logowania/rejestracji gdy użytkownik niezalogowany", async ({
-    page,
-  }) => {
+  test("wyświetla tytuł i linki do logowania/rejestracji gdy użytkownik niezalogowany", async ({ page }) => {
     const homePage = new HomePage(page);
     await homePage.goto();
 

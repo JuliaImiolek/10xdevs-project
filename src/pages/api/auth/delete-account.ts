@@ -13,10 +13,7 @@ export const prerender = false;
 export const POST: APIRoute = async ({ request, cookies, locals }) => {
   const userId = locals.userId;
   if (!userId) {
-    return json(
-      { error: "Zaloguj się, aby usunąć konto.", message: "Zaloguj się, aby usunąć konto." },
-      401
-    );
+    return json({ error: "Zaloguj się, aby usunąć konto.", message: "Zaloguj się, aby usunąć konto." }, 401);
   }
 
   let body: unknown;

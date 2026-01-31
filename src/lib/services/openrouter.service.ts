@@ -28,17 +28,17 @@ const ERROR_MESSAGE_NETWORK = "Network error";
 const ERROR_MESSAGE_TIMEOUT = "Request timeout";
 
 /** Wynik wewnętrzny parseResponse (sukces lub błąd). */
-type ParseSuccess = {
+interface ParseSuccess {
   ok: true;
   content: string;
   usage?: OpenRouterUsage;
   model?: string;
-};
-type ParseError = {
+}
+interface ParseError {
   ok: false;
   errorCode: number | string;
   errorMessage: string;
-};
+}
 type ParseResult = ParseSuccess | ParseError;
 
 // ------------------------------------------------------------------------------------------------
@@ -61,17 +61,14 @@ export class OpenRouterService {
   private readonly requestTimeoutMs: number;
 
   constructor(options?: OpenRouterServiceConfig) {
-    this.baseUrl =
-      options?.baseUrl ?? OPENROUTER_BASE_URL;
+    this.baseUrl = options?.baseUrl ?? OPENROUTER_BASE_URL;
     this.apiKey =
       options?.apiKey ??
       (import.meta.env?.OPENROUTER_API_KEY as string | undefined) ??
       (typeof process !== "undefined" ? process.env?.OPENROUTER_API_KEY : undefined) ??
       "";
-    this.defaultModel =
-      options?.defaultModel ?? DEFAULT_MODEL;
-    this.requestTimeoutMs =
-      options?.requestTimeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
+    this.defaultModel = options?.defaultModel ?? DEFAULT_MODEL;
+    this.requestTimeoutMs = options?.requestTimeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
   }
 
   // ------------------------------------------------------------------------------------------------
@@ -91,9 +88,7 @@ export class OpenRouterService {
     messages?: OpenRouterMessage[]
   ): OpenRouterMessage[] {
     const hasSystem = systemMessage != null && systemMessage.trim() !== "";
-    const systemPart: OpenRouterMessage[] = hasSystem
-      ? [{ role: "system", content: systemMessage!.trim() }]
-      : [];
+    const systemPart: OpenRouterMessage[] = hasSystem ? [{ role: "system", content: systemMessage.trim() }] : [];
 
     if (messages != null && messages.length > 0) {
       return [...systemPart, ...messages];
@@ -103,10 +98,7 @@ export class OpenRouterService {
       return systemPart.length > 0 ? systemPart : [];
     }
 
-    return [
-      ...systemPart,
-      { role: "user", content: userMessage.trim() },
-    ];
+    return [...systemPart, { role: "user", content: userMessage.trim() }];
   }
 
   // ------------------------------------------------------------------------------------------------
@@ -130,10 +122,8 @@ export class OpenRouterService {
     if (params?.max_tokens != null) body.max_tokens = params.max_tokens;
     if (params?.temperature != null) body.temperature = params.temperature;
     if (params?.top_p != null) body.top_p = params.top_p;
-    if (params?.frequency_penalty != null)
-      body.frequency_penalty = params.frequency_penalty;
-    if (params?.presence_penalty != null)
-      body.presence_penalty = params.presence_penalty;
+    if (params?.frequency_penalty != null) body.frequency_penalty = params.frequency_penalty;
+    if (params?.presence_penalty != null) body.presence_penalty = params.presence_penalty;
     if (params?.stop != null) body.stop = params.stop;
     if (params?.seed != null) body.seed = params.seed;
 
@@ -163,15 +153,9 @@ export class OpenRouterService {
         throw new Error(ERROR_MESSAGE_TIMEOUT);
       }
       const detail =
-        err instanceof Error
-          ? err.cause instanceof Error
-            ? err.cause.message
-            : err.message
-          : String(err);
+        err instanceof Error ? (err.cause instanceof Error ? err.cause.message : err.message) : String(err);
       const message =
-        detail && detail !== ERROR_MESSAGE_NETWORK
-          ? `${ERROR_MESSAGE_NETWORK}: ${detail}`
-          : ERROR_MESSAGE_NETWORK;
+        detail && detail !== ERROR_MESSAGE_NETWORK ? `${ERROR_MESSAGE_NETWORK}: ${detail}` : ERROR_MESSAGE_NETWORK;
       throw new Error(message);
     } finally {
       clearTimeout(timeoutId);
@@ -225,11 +209,7 @@ export class OpenRouterService {
       };
     }
 
-    const messages = this.buildMessages(
-      options.systemMessage,
-      options.userMessage,
-      options.messages
-    );
+    const messages = this.buildMessages(options.systemMessage, options.userMessage, options.messages);
     if (messages.length === 0) {
       return {
         success: false,
@@ -247,12 +227,7 @@ export class OpenRouterService {
       stop: options.stop,
       seed: options.seed,
     };
-    const body = this.buildBody(
-      messages,
-      options.model ?? this.defaultModel,
-      options.responseFormat,
-      params
-    );
+    const body = this.buildBody(messages, options.model ?? this.defaultModel, options.responseFormat, params);
 
     let response: Response;
     try {

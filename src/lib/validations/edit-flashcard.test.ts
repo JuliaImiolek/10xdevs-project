@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  validateEditFlashcardForm,
-  FRONT_MAX,
-  BACK_MAX,
-} from "./edit-flashcard";
+import { validateEditFlashcardForm, FRONT_MAX, BACK_MAX } from "./edit-flashcard";
 
 describe("validateEditFlashcardForm", () => {
   describe("reguły biznesowe – pola wymagane", () => {

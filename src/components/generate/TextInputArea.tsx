@@ -17,14 +17,7 @@ export interface TextInputAreaProps {
  * Text area for source text (1000–10000 characters).
  * Validates length on blur and reports error via parent state.
  */
-function TextInputArea({
-  value,
-  onChange,
-  error,
-  onBlur,
-  disabled = false,
-  className,
-}: TextInputAreaProps) {
+function TextInputArea({ value, onChange, error, onBlur, disabled = false, className }: TextInputAreaProps) {
   const id = React.useId();
   const errorId = `${id}-error`;
 
@@ -59,21 +52,14 @@ function TextInputArea({
         aria-describedby={error ? errorId : undefined}
       />
       {error && (
-        <p
-          id={errorId}
-          role="alert"
-          className="text-sm text-destructive"
-        >
+        <p id={errorId} role="alert" className="text-sm text-destructive">
           {error}
         </p>
       )}
       <p className="text-muted-foreground text-xs">
         {value.length} / {MAX_LENGTH} znaków
         {value.length > 0 && value.length < MIN_LENGTH && (
-          <span className="text-destructive">
-            {" "}
-            (wymagane minimum: {MIN_LENGTH})
-          </span>
+          <span className="text-destructive"> (wymagane minimum: {MIN_LENGTH})</span>
         )}
       </p>
     </div>

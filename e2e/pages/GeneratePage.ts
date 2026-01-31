@@ -35,7 +35,7 @@ export class GeneratePage {
     this.inputBack = page.getByLabel("Tył");
     this.buttonAddFlashcard = page.getByRole("button", { name: /Dodaj fiszkę|Zapisz fiszkę/ });
     // Toast error (ErrorNotification): single role="alert" with aria-live to avoid matching inline field errors
-this.errorNotification = page.locator('div[role="alert"][aria-live="assertive"]');
+    this.errorNotification = page.locator('div[role="alert"][aria-live="assertive"]');
     this.skeletonLoader = page.locator("[data-slot='skeleton-loader']");
     this.flashcardListSection = page.getByRole("region", { name: "Lista propozycji fiszek" });
     this.buttonSaveAccepted = page.getByRole("button", { name: /Zapisz tylko zaakceptowane fiszki/ });

@@ -2,13 +2,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorNotification } from "@/components/generate/ErrorNotification";
 import { validateEmail } from "@/lib/validations/auth";
 
@@ -52,9 +46,7 @@ function ForgotPasswordForm() {
           return;
         }
 
-        setFormError(
-          data?.message ?? data?.error ?? "Wystąpił błąd. Spróbuj ponownie później."
-        );
+        setFormError(data?.message ?? data?.error ?? "Wystąpił błąd. Spróbuj ponownie później.");
       } catch {
         setFormError("Wystąpił błąd połączenia. Sprawdź połączenie i spróbuj ponownie.");
       } finally {

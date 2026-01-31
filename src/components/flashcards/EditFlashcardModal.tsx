@@ -22,12 +22,7 @@ export interface EditFlashcardModalProps {
   onError: (message: string) => void;
 }
 
-export function EditFlashcardModal({
-  flashcard,
-  onClose,
-  onSaved,
-  onError,
-}: EditFlashcardModalProps) {
+export function EditFlashcardModal({ flashcard, onClose, onSaved, onError }: EditFlashcardModalProps) {
   const [front, setFront] = React.useState("");
   const [back, setBack] = React.useState("");
   const [source, setSource] = React.useState<"ai-edited" | "manual">("manual");
@@ -41,11 +36,7 @@ export function EditFlashcardModal({
     if (flashcard) {
       setFront(flashcard.front);
       setBack(flashcard.back);
-      setSource(
-        flashcard.source === "ai-edited" || flashcard.source === "manual"
-          ? flashcard.source
-          : "manual"
-      );
+      setSource(flashcard.source === "ai-edited" || flashcard.source === "manual" ? flashcard.source : "manual");
       setErrors({});
     }
   }, [flashcard]);

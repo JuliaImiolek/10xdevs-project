@@ -154,10 +154,7 @@ export default function SessionView() {
     <main role="main" aria-label="Sesja powtórek" className="space-y-6">
       <h1 className="text-2xl font-semibold">Sesja powtórek</h1>
 
-      <SessionProgress
-        currentIndex={currentIndex + 1}
-        total={cards.length}
-      />
+      <SessionProgress currentIndex={currentIndex + 1} total={cards.length} />
 
       <SessionCard flashcard={currentCard} revealed={revealed} />
 

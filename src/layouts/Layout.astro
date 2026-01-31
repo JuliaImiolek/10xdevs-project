@@ -26,21 +26,49 @@ const isLoggedIn = Boolean(userId ?? user?.id);
   <body>
     <nav class="border-b bg-background px-4 py-3" aria-label="Główna nawigacja">
       <div class="container mx-auto max-w-4xl flex flex-wrap items-center gap-6">
-        {isLoggedIn ? (
-          <>
-            <a href="/" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Strona główna</a>
-            <a href="/generate" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Generuj fiszki</a>
-            <a href="/flashcards" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Moje fiszki</a>
-            <a href="/session" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Sesja nauki</a>
-            <a href="/account" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Ustawienia konta</a>
-            <LogoutButton client:load />
-          </>
-        ) : (
-          <>
-            <a href="/auth/login" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Zaloguj</a>
-            <a href="/auth/register" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">Zarejestruj</a>
-          </>
-        )}
+        {
+          isLoggedIn ? (
+            <>
+              <a href="/" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">
+                Strona główna
+              </a>
+              <a
+                href="/generate"
+                class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors"
+              >
+                Generuj fiszki
+              </a>
+              <a
+                href="/flashcards"
+                class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors"
+              >
+                Moje fiszki
+              </a>
+              <a href="/session" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">
+                Sesja nauki
+              </a>
+              <a href="/account" class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors">
+                Ustawienia konta
+              </a>
+              <LogoutButton client:load />
+            </>
+          ) : (
+            <>
+              <a
+                href="/auth/login"
+                class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors"
+              >
+                Zaloguj
+              </a>
+              <a
+                href="/auth/register"
+                class="text-sm font-medium text-foreground hover:text-foreground/80 transition-colors"
+              >
+                Zarejestruj
+              </a>
+            </>
+          )
+        }
       </div>
     </nav>
     <slot />

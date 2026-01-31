@@ -8,19 +8,8 @@ import { EditFlashcardModal } from "./EditFlashcardModal";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 
 export default function FlashcardsView() {
-  const {
-    data,
-    pagination,
-    loading,
-    error,
-    refetch,
-    page,
-    setPage,
-    sort,
-    setSort,
-    sourceFilter,
-    setSourceFilter,
-  } = useFlashcardsList();
+  const { data, pagination, loading, error, refetch, setPage, sort, setSort, sourceFilter, setSourceFilter } =
+    useFlashcardsList();
 
   const [searchQuery, setSearchQuery] = React.useState("");
   const [editingFlashcard, setEditingFlashcard] = React.useState<FlashcardDto | null>(null);
@@ -31,10 +20,7 @@ export default function FlashcardsView() {
   const filteredData = React.useMemo(() => {
     if (!searchQuery.trim()) return data;
     const q = searchQuery.trim().toLowerCase();
-    return data.filter(
-      (f) =>
-        f.front.toLowerCase().includes(q) || f.back.toLowerCase().includes(q)
-    );
+    return data.filter((f) => f.front.toLowerCase().includes(q) || f.back.toLowerCase().includes(q));
   }, [data, searchQuery]);
 
   const handleEdit = React.useCallback((f: FlashcardDto) => {
@@ -53,15 +39,12 @@ export default function FlashcardsView() {
     [setPage]
   );
 
-  const handleSaved = React.useCallback(
-    (_updated: FlashcardDto) => {
-      setEditingFlashcard(null);
-      refetch();
-    },
-    [refetch]
-  );
+  const handleSaved = React.useCallback(() => {
+    setEditingFlashcard(null);
+    refetch();
+  }, [refetch]);
 
-  const handleEditError = React.useCallback((message: string) => {
+  const handleEditError = React.useCallback(() => {
     setEditingFlashcard(null);
   }, []);
 

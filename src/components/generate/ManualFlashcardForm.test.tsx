@@ -108,12 +108,8 @@ describe("ManualFlashcardForm", () => {
       await waitFor(() => {
         expect(screen.getByText("Fiszka została zapisana.")).toBeInTheDocument();
       });
-      expect(
-        (screen.getByPlaceholderText(/treść strony przedniej/i) as HTMLInputElement).value
-      ).toBe("");
-      expect(
-        (screen.getByPlaceholderText(/treść strony tylnej/i) as HTMLTextAreaElement).value
-      ).toBe("");
+      expect((screen.getByPlaceholderText(/treść strony przedniej/i) as HTMLInputElement).value).toBe("");
+      expect((screen.getByPlaceholderText(/treść strony tylnej/i) as HTMLTextAreaElement).value).toBe("");
     });
 
     it("po błędzie API wywołuje onError i pokazuje komunikat błędu", async () => {

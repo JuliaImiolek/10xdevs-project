@@ -2,13 +2,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorNotification } from "@/components/generate/ErrorNotification";
 
 const CONFIRM_PHRASE = "USUŃ";
@@ -53,9 +47,7 @@ function DeleteAccountForm() {
           return;
         }
 
-        setFormError(
-          data?.message ?? data?.error ?? "Wystąpił błąd podczas usuwania konta. Spróbuj ponownie."
-        );
+        setFormError(data?.message ?? data?.error ?? "Wystąpił błąd podczas usuwania konta. Spróbuj ponownie.");
       } catch {
         setFormError("Wystąpił błąd połączenia. Sprawdź połączenie i spróbuj ponownie.");
       } finally {
@@ -73,17 +65,15 @@ function DeleteAccountForm() {
             Usuń konto
           </CardTitle>
           <CardDescription>
-            Ta operacja jest nieodwracalna. Wszystkie Twoje fiszki i dane zostaną trwale usunięte.
-            Wpisz „{CONFIRM_PHRASE}” w pole poniżej, aby potwierdzić.
+            Ta operacja jest nieodwracalna. Wszystkie Twoje fiszki i dane zostaną trwale usunięte. Wpisz „
+            {CONFIRM_PHRASE}” w pole poniżej, aby potwierdzić.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {formError && <ErrorNotification errorMessage={formError} />}
 
           <div className="space-y-2">
-            <Label htmlFor={confirmId}>
-              Wpisz „{CONFIRM_PHRASE}”, aby potwierdzić
-            </Label>
+            <Label htmlFor={confirmId}>Wpisz „{CONFIRM_PHRASE}”, aby potwierdzić</Label>
             <Input
               id={confirmId}
               type="text"
